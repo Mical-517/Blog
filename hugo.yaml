@@ -1,0 +1,77 @@
+baseURL: "https://micaldev.top"
+title: "Mical的个人博客"
+LanguageCode: "zh-CN"
+theme: "PaperMod"
+
+# 启用首页个人简介展示
+params:
+  # 是否启用评论。你需要自己配置，或者直接引入Giscus等评论系统
+  comments: false
+  # 文章日期格式
+  DateFormat: "2006-01-02"
+  # 是否显示代码复制按钮
+  ShowCodeCopyButtons: true
+  # 是否显示面包屑导航
+  ShowBreadCrumbs: false
+  # 是否显示阅读时间
+  ShowReadingTime: true
+  # 是否显示字数
+  ShowWordCount: true
+  # 是否显示分享按钮
+  ShowShareButtons: true
+  # 分享按钮配置
+  # ShareButtons: ["linkedin", "twitter"]
+  # 是否禁用主题切换按钮
+  disableThemeToggle: false
+  assets:
+    favicon: "/WriteBlog.png" # 需要在static文件夹放置对应的图片
+    iconHeight: 35
+  # 首页信息配置
+  homeInfoParams:
+    Title: "Mical"
+    Content: >
+      频繁记录吧， 生活的本意是开心
+
+  # 设置网站头像和首页头像
+  profileMode:
+    enabled: false # 设为 true 将完全替换 homeInfoParams
+
+  # 网站头像设置 (显示在导航栏)
+  label:
+    text: "欢迎来到我的博客😀"
+    icon: "/avatar.png" # 这将显示在导航栏标题旁边。需要在static文件夹放置对应的图片
+    iconHeight: 55
+
+  # 社交图标 (显示在简介下方)
+  socialIcons:
+    - name: github
+      url: "https://github.com/"
+    - name: bilibili
+      url: "https://space.bilibili.com/3546734017907108?spm_id_from=333.1007.0.0"
+    - name: youtube
+      url: "https://news.youtube.com/new"
+    # 可以添加更多社交图标 https://github.com/adityatelange/hugo-PaperMod/wiki/Icons
+
+# 顶部导航栏的快捷链接
+menu:
+  main:
+    - identifier: archives
+      name: 归档
+      url: /archives/
+      weight: 5
+    - identifier: categories
+      name: 分类
+      url: /categories/
+      weight: 10
+    - identifier: tags
+      name: 标签
+      url: /tags/
+      weight: 20
+    # 可以添加更多导航链接。weight的值越高排序越靠后
+
+# 如果要启用搜索功能，需要添加这个
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON # 必须，用于搜索功能

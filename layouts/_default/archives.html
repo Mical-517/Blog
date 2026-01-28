@@ -1,0 +1,36 @@
+{{- define "main" }}
+
+<header class="page-header">
+  <h1>{{ .Title }}</h1>
+</header>
+
+{{- $pages := where site.RegularPages "Section" "in" site.Params.mainSections }}
+{{- $pages = $pages.GroupByDate "2006" }}
+
+<div class="archive-timeline">
+  {{- range $pages }}
+  <div class="archive-year">
+    <div class="archive-year-header">
+      <span class="year-number">{{ .Key }}</span>
+      <span class="year-dot-main"></span>
+      <span class="year-count">{{ len .Pages }} 篇文章</span>
+    </div>
+    
+    <div class="archive-month-list">
+      {{- range .Pages }}
+      <div class="archive-entry">
+        <div class="archive-entry-date">
+          {{ .Date.Format "01-02" }}
+        </div>
+        <div class="archive-entry-dot"></div>
+        <div class="archive-entry-title">
+          <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </div>
+      </div>
+      {{- end }}
+    </div>
+  </div>
+  {{- end }}
+</div>
+
+{{- end }}{{/* end main */}}

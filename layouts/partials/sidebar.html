@@ -1,0 +1,43 @@
+<aside class="sidebar">
+    <div class="sidebar-inner">
+        <div class="sidebar-profile">
+            {{- if site.Params.label.icon }}
+            <div class="sidebar-avatar">
+                <img src="{{ "/avatar.png" | relURL }}" alt="avatar">
+            </div>
+            {{- end }}
+            <div class="sidebar-info">
+                {{- with site.Params.homeInfoParams }}
+                <h2 class="sidebar-name">{{ .Title | markdownify }}</h2>
+                <p class="sidebar-motto">{{ .Content | markdownify }}</p>
+                {{- end }}
+            </div>
+            <div class="sidebar-social">
+                {{ partial "social_icons.html" (dict "align" "center") }}
+            </div>
+        </div>
+        
+        <div class="sidebar-stats">
+            <div class="stat-item">
+                <span class="stat-value">{{ len (where site.RegularPages "Section" "posts") }}</span>
+                <span class="stat-label">文章数</span>
+            </div>
+            <div class="stat-item">
+                {{- $totalWords := 0 -}}
+                {{- range (where site.RegularPages "Section" "posts") -}}
+                    {{- $totalWords = add $totalWords .WordCount -}}
+                {{- end -}}
+                <span class="stat-value">{{ if ge $totalWords 1000 }}{{ printf "%.1fk" (div (float $totalWords) 1000.0) }}{{ else }}{{ $totalWords }}{{ end }}</span>
+                <span class="stat-label">总字数</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">0</span>
+                <span class="stat-label">访问量</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">0</span>
+                <span class="stat-label">访客数</span>
+            </div>
+        </div>
+    </div>
+</aside>

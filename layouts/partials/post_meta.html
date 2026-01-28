@@ -1,0 +1,55 @@
+{{- $scratch := newScratch }}
+
+{{- if not .Date.IsZero -}}
+{{- $scratch.Add "meta" (slice (printf "<span class='meta-item'>%s</span>" (.Date.Format "2006-01-02"))) }}
+{{- end }}
+
+{{- if (.Param "ShowWordCount") -}}
+{{- $scratch.Add "meta" (slice (printf "<span class='meta-item'>%d 字</span>" .WordCount)) }}
+{{- end }}
+
+{{- if (.Param "ShowReadingTime") -}}
+{{- $scratch.Add "meta" (slice (printf "<span class='meta-item'>%d 分钟</span>" .ReadingTime)) }}
+{{- end }}
+
+{{- if not (.Param "hideAuthor") -}}
+{{- with (partial "author.html" .) }}
+{{- $scratch.Add "meta" (slice (printf "<span class='meta-item'>%s</span>" .)) }}
+{{- end }}
+{{- end }}
+
+{{- /* Post Taxonomies (Categories & Tags) */ -}}
+<div class="post-taxonomies">
+    {{- if .Params.categories -}}
+    <div class="post-categories">
+        {{- if (printf "%T" .Params.categories | findRE `^\[\]`) -}}
+            {{- range .Params.categories -}}
+            <a href="{{ "/categories/" | relLangURL }}{{ . | urlize }}/" class="cat-item">{{ . }}</a>
+            {{- end -}}
+        {{- else -}}
+            <a href="{{ "/categories/" | relLangURL }}{{ .Params.categories | urlize }}/" class="cat-item">{{ .Params.categories }}</a>
+        {{- end -}}
+    </div>
+    {{- end -}}
+    {{- if .Params.tags -}}
+    <div class="post-tags">
+        {{- if (printf "%T" .Params.tags | findRE `^\[\]`) -}}
+            {{- range .Params.tags -}}
+            <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}/" class="tag-item">#{{ . }}</a>
+            {{- end -}}
+        {{- else -}}
+            <a href="{{ "/tags/" | relLangURL }}{{ .Params.tags | urlize }}/" class="tag-item">#{{ .Params.tags }}</a>
+        {{- end -}}
+    </div>
+    {{- end -}}
+</div>
+
+{{- /* Busuanzi Views (Only on Single Page) */ -}}
+{{- if .IsPage -}}
+{{- end -}}
+
+<div class="post-meta-items">
+{{- with ($scratch.Get "meta") }}
+{{- delimit . "&nbsp;·&nbsp;" | safeHTML -}}
+{{- end -}}
+</div>
