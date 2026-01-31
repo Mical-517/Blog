@@ -3,7 +3,7 @@ title: Maze
 published: 2026-01-31T19:38:37+08:00
 summary: "迷宫系统"
 cover:
-  image: 文章封面图。也支持HTTPS
+  image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202601300127015.png
 tags: [stack]
 categories: '数据结构'
 draft: false
