@@ -60,9 +60,11 @@ class KDTree
     //删除节点
     void erase(DataType& value1,DataType& value2);
     //查找节点
-    KDNode<DataType>* search(DataType& value1,DataType& value2,int& i);
+    KDNode<DataType>* search(DataType& value1,DataType& value2);
     //清空树
     void clear();
+    //最近邻搜索
+    KDNode<DataType>* nearestNeighborSearch(const DataType& value1, const DataType& value2);
 
     private:
     KDNode<DataType>* root;
@@ -73,6 +75,10 @@ class KDTree
     KDNode<DataType>* findMin(KDNode<DataType>* rootPtr, int targetDi, int currDi);
     //清空树
     void clearHelper(KDNode<DataType>*& rootPtr);
+    //最近邻搜索辅助函数
+    void nearestNeighborSearchHelper(const KDNode<DataType>* rootPtr, const KDNode<DataType>& targetNode, KDNode<DataType>*& bestNode, double& minDistanceSq, int currDi);
+    //计算两点距离的平方
+    double distanceSquared(const KDNode<DataType>* n1, const KDNode<DataType>* n2);
 };
 
 template<class DataType>
@@ -104,8 +110,7 @@ template<class DataType>
 void KDTree<DataType>::erase(DataType& value1,DataType& value2)
 {
     // 检查节点是否存在
-    int dummy = 0;
-    if (search(value1, value2, dummy) != nullptr) {
+    if (search(value1, value2) != nullptr) {
         root = eraseHelper(root, value1, value2, 0);
         sum--;
     }
@@ -194,10 +199,10 @@ KDNode<DataType>* KDTree<DataType>::findMin(KDNode<DataType>* rootPtr, int targe
 
 
 template<class DataType>
-KDNode<DataType>* KDTree<DataType>::search(DataType& value1,DataType& value2,int& i)
+KDNode<DataType>* KDTree<DataType>::search(DataType& value1,DataType& value2)
 {
     KDNode<DataType>* curr=this->root;
-    i=0;
+    int i=0;
     KDNode<DataType> newNode(value1,value2);
     while(curr!=nullptr)
     {
@@ -227,6 +232,72 @@ void KDTree<DataType>::clearHelper(KDNode<DataType>*& rootPtr)
     rootPtr=nullptr;
 }
 
+template<class DataType>
+double KDTree<DataType>::distanceSquared(const KDNode<DataType>* n1, const KDNode<DataType>* n2)
+{
+    double dx = n1->data[0] - n2->data[0];
+    double dy = n1->data[1] - n2->data[1];
+    return dx * dx + dy * dy;
+}
+
+template<class DataType>
+KDNode<DataType>* KDTree<DataType>::nearestNeighborSearch(const DataType& value1, const DataType& value2)
+{
+    if (this->root == nullptr) {
+        return nullptr;
+    }
+    KDNode<DataType> targetNode(value1, value2);
+    KDNode<DataType>* bestNode = nullptr;
+    double minDistanceSq = -1.0; // 使用-1.0表示无限大
+
+    nearestNeighborSearchHelper(this->root, targetNode, bestNode, minDistanceSq, 0);
+    return bestNode;
+}
+
+
+template<class DataType>
+void KDTree<DataType>::nearestNeighborSearchHelper(const KDNode<DataType>* rootPtr, const KDNode<DataType>& targetNode, KDNode<DataType>*& bestNode, double& minDistanceSq, int currDi)
+{
+    if (rootPtr == nullptr) {
+        return;
+    }
+
+    // 1. 沿着路径向下搜索
+    KDNode<DataType>* searchPath = nullptr;
+    KDNode<DataType>* otherPath = nullptr;
+
+    if (targetNode.data[currDi] < rootPtr->data[currDi]) {
+        searchPath = rootPtr->left;
+        otherPath = rootPtr->right;
+    } else {
+        searchPath = rootPtr->right;
+        otherPath = rootPtr->left;
+    }
+
+    // 递归进入更可能包含最近邻的子树
+    nearestNeighborSearchHelper(searchPath, targetNode, bestNode, minDistanceSq, (currDi + 1) % 2);
+
+    // 2. 回溯
+    // (a) 检查当前节点是否是更近的点
+    double currentDistSq = distanceSquared(rootPtr, &targetNode);
+    if (bestNode == nullptr || currentDistSq < minDistanceSq) {
+        minDistanceSq = currentDistSq;
+        bestNode = const_cast<KDNode<DataType>*>(rootPtr);
+    }
+
+    // (b) 检查是否需要搜索另一侧的子树
+    // 计算目标点到分割超平面的距离的平方
+    double distToSplitPlaneSq = targetNode.data[currDi] - rootPtr->data[currDi];
+    distToSplitPlaneSq *= distToSplitPlaneSq;
+
+    // 如果以目标点为圆心，minDistance为半径的圆与分割平面相交，则另一侧子树可能存在更近的点
+    if (distToSplitPlaneSq < minDistanceSq) {
+        nearestNeighborSearchHelper(otherPath, targetNode, bestNode, minDistanceSq, (currDi + 1) % 2);
+    }
+}
+
+
+
 ```
 
 # 设计思路
@@ -236,6 +307,10 @@ void KDTree<DataType>::clearHelper(KDNode<DataType>*& rootPtr)
 kd树是一种分割k维数据空间的数据结构，主要应用于多维空间关键数据的搜索
 
 kd树也是二叉树，是用于分割多维空间的数据结构，所以其每一个节点是一个多维坐标。
+
+即：
+
+**把K-D树看做k维空间中的实例点的集合，树上的分叉相当于k维空间中的超平面，超平面将k维空间中的实例点分成两个集合，两个集合分别用分叉点的左右子树表示，若当前节点的划分维度为d，当前节点在d维的坐标值是x，则当前节点左子树所有点在d维的坐标值均小于x，右子树均大于x**
 
 先来看看kd树的构造：
 
@@ -309,6 +384,203 @@ kd树也是二叉树，是用于分割多维空间的数据结构，所以其每
 删除函数是从根节点开始扫描，所以每个函数参数表示的是当前节点的比较维度
 
 但是findmin函数要找到待删除节点维度下的直接后继，所以有两个参数
+
+### 最近邻点搜索函数
+
+知识概要简介：
+
+[KNN(K近邻)算法之——KD-Tree构建及查找原理 - hello_nullptr - 博客园](https://www.cnblogs.com/hello-nullptr/p/18369092)
+
+关键函数实现:
+
+1. 没有返回值类型
+
+   ```c++
+   // ...existing code...
+       //清空树
+       void clearHelper(KDNode<DataType>*& rootPtr);
+       //最近邻搜索辅助函数
+       void nearestNeighborSearchHelper(const KDNode<DataType>* rootPtr, const KDNode<DataType>& targetNode, KDNode<DataType>*& bestNode, double& minDistanceSq, int currDi);
+       //计算两点距离的平方
+       double distanceSquared(const KDNode<DataType>* n1, const KDNode<DataType>* n2);
+   };
+   
+   template<class DataType>
+   void KDTree<DataType>::insert(DataType& value1,DataType& value2)
+   // ...existing code...
+   // ...existing code...
+   template<class DataType>
+   void KDTree<DataType>::clearHelper(KDNode<DataType>*& rootPtr)
+   {
+   // ...existing code...
+       delete rootPtr;
+       rootPtr=nullptr;
+   }
+   
+   template<class DataType>
+   double KDTree<DataType>::distanceSquared(const KDNode<DataType>* n1, const KDNode<DataType>* n2)
+   {
+       double dx = n1->data[0] - n2->data[0];
+       double dy = n1->data[1] - n2->data[1];
+       return dx * dx + dy * dy;
+   }
+   
+   template<class DataType>
+   KDNode<DataType>* KDTree<DataType>::nearestNeighborSearch(const DataType& value1, const DataType& value2)
+   {
+       if (this->root == nullptr) {
+           return nullptr;
+       }
+       KDNode<DataType> targetNode(value1, value2);
+       KDNode<DataType>* bestNode = nullptr;
+       double minDistanceSq = -1.0; // 使用-1.0表示无限大
+   
+       nearestNeighborSearchHelper(this->root, targetNode, bestNode, minDistanceSq, 0);
+       return bestNode;
+   }
+   
+   template<class DataType>
+   void KDTree<DataType>::nearestNeighborSearchHelper(const KDNode<DataType>* rootPtr, const KDNode<DataType>& targetNode, KDNode<DataType>*& bestNode, double& minDistanceSq, int currDi)
+   {
+       if (rootPtr == nullptr) {
+           return;
+       }
+   
+       // 1. 沿着路径向下搜索
+       KDNode<DataType>* searchPath = nullptr;
+       KDNode<DataType>* otherPath = nullptr;
+   
+       if (targetNode.data[currDi] < rootPtr->data[currDi]) {
+           searchPath = rootPtr->left;
+           otherPath = rootPtr->right;
+       } else {
+           searchPath = rootPtr->right;
+           otherPath = rootPtr->left;
+       }
+   
+       // 递归进入更可能包含最近邻的子树
+       nearestNeighborSearchHelper(searchPath, targetNode, bestNode, minDistanceSq, (currDi + 1) % 2);
+   
+       // 2. 回溯
+       // (a) 检查当前节点是否是更近的点
+       double currentDistSq = distanceSquared(rootPtr, &targetNode);
+       if (bestNode == nullptr || currentDistSq < minDistanceSq) {
+           minDistanceSq = currentDistSq;
+           bestNode = const_cast<KDNode<DataType>*>(rootPtr);
+       }
+   
+       // (b) 检查是否需要搜索另一侧的子树
+       // 计算目标点到分割超平面的距离的平方
+       double distToSplitPlaneSq = targetNode.data[currDi] - rootPtr->data[currDi];
+       distToSplitPlaneSq *= distToSplitPlaneSq;
+   
+       // 如果以目标点为圆心，minDistance为半径的圆与分割平面相交，则另一侧子树可能存在更近的点
+       if (distToSplitPlaneSq < minDistanceSq) {
+           nearestNeighborSearchHelper(otherPath, targetNode, bestNode, minDistanceSq, (currDi + 1) % 2);
+       }
+   }
+   ```
+
+2. 带返回值类型
+
+   ```c++
+   // ...existing code...
+       //清空树
+       void clearHelper(KDNode<DataType>*& rootPtr);
+       //最近邻搜索辅助函数
+       KDNode<DataType>* nearestNeighborSearchHelper(const KDNode<DataType>* rootPtr, const KDNode<DataType>& targetNode, double& minDistanceSq, int currDi);
+       //计算两点距离的平方
+       double distanceSquared(const KDNode<DataType>* n1, const KDNode<DataType>* n2);
+   };
+   
+   // ...existing code...
+   template<class DataType>
+   void KDTree<DataType>::clearHelper(KDNode<DataType>*& rootPtr)
+   {
+   // ...existing code...
+       delete rootPtr;
+       rootPtr=nullptr;
+   }
+   
+   template<class DataType>
+   double KDTree<DataType>::distanceSquared(const KDNode<DataType>* n1, const KDNode<DataType>* n2)
+   {
+       double dx = n1->data[0] - n2->data[0];
+       double dy = n1->data[1] - n2->data[1];
+       return dx * dx + dy * dy;
+   }
+   
+   template<class DataType>
+   KDNode<DataType>* KDTree<DataType>::nearestNeighborSearch(const DataType& value1, const DataType& value2)
+   {
+       if (this->root == nullptr) {
+           return nullptr;
+       }
+       KDNode<DataType> targetNode(value1, value2);
+       double minDistanceSq = -1.0; // 使用-1.0或一个很大的数表示无限大
+   
+       return nearestNeighborSearchHelper(this->root, targetNode, minDistanceSq, 0);
+   }
+   
+   
+   template<class DataType>
+   KDNode<DataType>* KDTree<DataType>::nearestNeighborSearchHelper(const KDNode<DataType>* rootPtr, const KDNode<DataType>& targetNode, double& minDistanceSq, int currDi)
+   {
+       if (rootPtr == nullptr) {
+           return nullptr;
+       }
+   
+       // 1. 沿着路径向下搜索
+       const KDNode<DataType>* searchPath = nullptr;
+       const KDNode<DataType>* otherPath = nullptr;
+   
+       if (targetNode.data[currDi] < rootPtr->data[currDi]) {
+           searchPath = rootPtr->left;
+           otherPath = rootPtr->right;
+       } else {
+           searchPath = rootPtr->right;
+           otherPath = rootPtr->left;
+       }
+   
+       // 递归进入更可能包含最近邻的子树，并获取该子树中找到的最佳节点
+       KDNode<DataType>* bestNode = nearestNeighborSearchHelper(searchPath, targetNode, minDistanceSq, (currDi + 1) % 2);
+   
+       // 2. 回溯
+       // (a) 检查当前节点是否是更近的点
+       double currentDistSq = distanceSquared(rootPtr, &targetNode);
+       if (bestNode == nullptr || currentDistSq < minDistanceSq) {
+           minDistanceSq = currentDistSq;
+           bestNode = const_cast<KDNode<DataType>*>(rootPtr);
+       }
+   
+       // (b) 检查是否需要搜索另一侧的子树
+       double distToSplitPlaneSq = targetNode.data[currDi] - rootPtr->data[currDi];
+       distToSplitPlaneSq *= distToSplitPlaneSq;
+   
+       if (distToSplitPlaneSq < minDistanceSq) {
+           // 在另一侧子树中搜索，并与当前已知的最佳节点比较
+           KDNode<DataType>* otherBest = nearestNeighborSearchHelper(otherPath, targetNode, minDistanceSq, (currDi + 1) % 2);
+           if (otherBest != nullptr) {
+               // minDistanceSq 已经在递归调用中被更新，我们只需更新 bestNode
+               bestNode = otherBest;
+           }
+       }
+       
+       return bestNode;
+   }
+   ```
+
+关键要点：
+
+1. 递归向下搜索，然后回溯检查的整体思想
+
+2. 在回溯检查的过程中，**重要的依旧就是参数中的mindistance，他是全局的一个判断变量，用引用类型**
+
+3. 再进行另一侧子树的检查的时候，一开始我认为检查另一侧一定行不通，因为我一开始想的是既然要查的点在searchPath下，那么他就肯定不在otherPath下，所以再次调用的时候，她连一开始向下递归搜索都做不到
+
+   但是，实际是我忽略了这个点的维度是相对的，比如目标节点在当前节点上方，那他就不可以与当前节点下方的节点比较了吗，当然是可以的，因为可以与下方节点左右比较，上下只是当前节点的比较，不影响其他节点。
+
+
 
 
 
