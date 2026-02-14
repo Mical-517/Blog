@@ -492,3 +492,364 @@ void DiGraph<DataType, WeightType>::addVertex(const DataType data)
 }
 ```
 
+## 最短距离
+
+### 单源最短距离
+
+寻找最短路径是图论中的一个经典问题。给边指定某个权，可以表示城市间的距离，任务执行的时间段，两地之间信息传输的开销，两地之间物质运输的总量等。当确定从顶点v到顶点u的最短路径时，必须记录中间顶点w的相关距离信息。该信息可记录为与顶点相关的标记，此标记只表示v到w的距离，或者该路径中从w的前驱到v的距离。查找最短路径的方法需要这些标记。根据这些标记的更新次数，解决最短路径问题的方法分为两类：标记设置法(label-setting)和标记校正法(label-correcting).
+
+应用场景以及局限性：标记设置法需要处理遍历经过的每一个顶点，给每个顶点设置一个值，该值一直到运行结束都保持不变，但此方法只能处理权值为正的图。第二类方法是标记校正法，使用该方法时允许修改标记。这种方法可以运用于权值为负但不含反向循环的图（反向环是指构成此环的边的权相加为一个负值），但该方法可以保证对所有的顶点而言，图处理完后当前距离为最短路径。然而大多数标记设置法和标记校正法都可以归纳为同一类，因为它们都可以找到从一个顶点到其他所有顶点间的最短路径
+
+#### **通用算法**
+
+```c++
+genericShortestPathAlogrithm(带权的简单有向图digraph, 顶点first)
+	for 所有顶点v
+		currDist(v)=∞;
+	currDist(first)=0;
+	初始化toBeChecked;
+	while toBeChecked非空:
+		v=toBeChecked中的一个顶点；
+		从toBeChecked中删除v;
+		for v的所有邻接顶点u
+			if currDist(u)> currDist(v)+ weight(edge(vu))
+			currDist(u)= currDist(v)+ weight(edge(vu));
+			predecessor(u)=v;
+			如果u不在toBeChecked中，将u添加到其中。
+```
+
+**算法解读**
+
+该算法的核心思想是 **“松弛” (Relaxation)**。它维护一个从源点 `first` 到图中每个顶点 `v` 的当前已知最短距离估计值，我们称之为 `currDist(v)`。算法通过不断迭代，逐步优化这些距离估计值，直到它们收敛为真正的最短路径长度。
+
+1. **初始化**:
+   - 将源点 `first` 到自身的距离 `currDist(first)` 初始化为 0。
+   - 将源点到所有其他顶点的距离 `currDist(v)` 初始化为无穷大（∞），表示这些顶点暂时不可达。
+   - 同时，维护一个前驱顶点数组 `predecessor(v)`，用于记录路径，初始化为空。
+2. **迭代与松弛**:
+   - 算法维护一个待处理的顶点集合 `toBeChecked`。
+   - 在每次迭代中，从 `toBeChecked` 中取出一个顶点 `v` 进行处理。
+   - 对于 `v` 的每一个**出边**所指向的邻接顶点 `u`，进行一次“松弛”操作：
+     - **判断**：如果 “通过 `v` 到达 `u` 的路径” (`currDist(v) + weight(v, u)`) 比 “当前已知的到达 `u` 的最短路径” (`currDist(u)`) 更短。
+     - **更新**：如果更短，就更新 `currDist(u)` 为这个更短的值，并记录 `u` 的前驱是 `v`（即 `predecessor(u) = v`）。这代表我们找到了一条到达 `u` 的更优路径。
+3. **终止**:
+   - 当 `toBeChecked` 集合为空时，算法终止。此时，`currDist` 数组中存储的就是从源点 `first` 到各顶点的最短路径长度。
+
+#### **在我的十字链表中的应用**
+
+```c++
+#pragma once
+#include <iostream>
+#include <vector>      // 新增：用于存储结果
+#include <queue>       // 新增：用于优先队列
+#include <limits>      // 新增：用于表示无穷大
+#include <functional>  // 新增：用于优先队列的比较器
+
+using namespace std;
+
+// ... (EdgeNode 和 VertexNode 的定义保持不变) ...
+
+// 十字链表有向图
+template <class DataType, class WeightType>
+class DiGraph
+{
+public:
+    // ... (现有构造函数、析构函数和成员函数) ...
+    void print();
+    int outDegree(const DataType data);
+    int inDegree(const DataType data);
+
+    // 新增：Dijkstra 算法的返回结果结构体
+    struct DijkstraResult {
+        vector<WeightType> dist; // 存储从源点到各顶点的最短距离
+        vector<int> path;        // 存储最短路径的前驱顶点索引
+    };
+
+    // 新增：Dijkstra 算法的声明
+    DijkstraResult dijkstra(const DataType startVertex);
+
+
+private:
+    // ... (现有私有成员) ...
+};
+
+// ... (现有函数实现，如构造函数, addEdge, print 等) ...
+```
+
+```c++
+// ... (所有现有函数实现) ...
+
+// 新增：Dijkstra 算法的实现
+template <class DataType, class WeightType>
+typename DiGraph<DataType, WeightType>::DijkstraResult
+DiGraph<DataType, WeightType>::dijkstra(const DataType startVertex)
+{
+    // 1. 初始化
+    int startIndex = search(startVertex);
+    if (startIndex == -1)
+    {
+        cerr << "Dijkstra Error: Start vertex not found in the graph.\n";
+        return {}; // 返回空结果
+    }
+
+    DijkstraResult result;
+    // 初始化距离数组为无穷大
+    result.dist.assign(this->capacity, numeric_limits<WeightType>::max());
+    // 初始化路径数组为-1（表示没有前驱）
+    result.path.assign(this->capacity, -1);
+
+    // 设置源点的距离为0
+    result.dist[startIndex] = 0;
+
+    // 定义优先队列，用于存储 {距离, 顶点索引} 对。
+    // `greater` 使其成为最小优先队列（距离最小的在顶部）。
+    using Pair = pair<WeightType, int>;
+    priority_queue<Pair, vector<Pair>, greater<Pair>> pq;
+
+    // 将源点加入优先队列
+    pq.push({0, startIndex});
+
+    // 2. 主循环 (while toBeChecked 非空)
+    while (!pq.empty())
+    {
+        // 3. v = toBeChecked 中 currDist(v) 最小的顶点
+        WeightType currentDist = pq.top().first;
+        int v_idx = pq.top().second;
+        pq.pop(); // 从 toBeChecked 中删除 v
+
+        // 如果我们已经找到了到 v_idx 的更短路径，则跳过此次处理
+        if (currentDist > result.dist[v_idx])
+        {
+            continue;
+        }
+
+        // 4. for v 的所有邻接顶点 u
+        EdgeNode<WeightType> *edge = this->vertexArry[v_idx].firstOut;
+        while (edge != nullptr)
+        {
+            int u_idx = edge->tailIndex;
+            WeightType weight = edge->weight;
+
+            // 5. 松弛操作 (Relaxation)
+            // if currDist(u) > currDist(v) + weight(edge(vu))
+            if (result.dist[u_idx] > result.dist[v_idx] + weight)
+            {
+                // 更新距离
+                result.dist[u_idx] = result.dist[v_idx] + weight;
+                // 更新前驱
+                result.path[u_idx] = v_idx;
+                // 将更新后的顶点 u 加入优先队列
+                pq.push({result.dist[u_idx], u_idx});
+            }
+            edge = edge->headEdge;
+        }
+    }
+
+    return result;
+}
+```
+
+**代码知识解读**
+
+1. 初始化部分
+
+```c++
+int startIndex = search(startVertex);
+if (startIndex == -1)
+{
+    cerr << "Dijkstra Error: Start vertex not found in the graph.\n";
+    return {}; // 返回空结果
+}
+
+DijkstraResult result;
+// 初始化距离数组为无穷大
+result.dist.assign(this->capacity, numeric_limits<WeightType>::max());
+// 初始化路径数组为-1（表示没有前驱）
+result.path.assign(this->capacity, -1);
+
+// 设置源点的距离为0
+result.dist[startIndex] = 0;
+```
+
+- `result.dist` 和 `result.path` 都是 `vector` 容器：
+
+  - `vector::assign(n, val)`：是 `vector` 的初始化方法，意思是 “给容器分配 `n` 个元素，每个元素的值都是 `val`”；
+  - 这里 `this->capacity` 是图的顶点总数，所以 `dist` 数组初始时所有顶点到起点的距离都是 “无穷大”（`numeric_limits<WeightType>::max()`），`path` 数组初始时所有顶点都没有前驱（用 `-1` 标记）；
+  - 最后把起点自身的距离设为 0（到自己的最短路径长度为 0）。
+
+  
+
+2. 优先队列（核心容器）的定义与初始化
+
+```c++
+// 定义优先队列，用于存储 {距离, 顶点索引} 对。
+// `greater` 使其成为最小优先队列（距离最小的在顶部）。
+using Pair = pair<WeightType, int>;
+priority_queue<Pair, vector<Pair>, greater<Pair>> pq;
+
+// 将源点加入优先队列
+pq.push({0, startIndex});
+```
+
+这部分是你重点要掌握的，我拆成 `pair` 和 `priority_queue` 两部分讲：
+
+(1)  `pair` 详解
+
+- **本质**：`pair` 是 C++ STL 中的一个模板类，定义在 `<utility>` 头文件中，作用是**把两个不同类型的值 “打包” 成一个整体**，可以理解为 “极简版的结构体”。
+
+- **语法**：`pair<T1, T2>`，其中 `T1` 是第一个元素的类型，`T2` 是第二个元素的类型；
+
+  - 访问元素：`pair.first` 取第一个元素，`pair.second` 取第二个元素；
+  - 初始化：可以用 `{val1, val2}`（C++11 及以上）或 `make_pair(val1, val2)`。
+
+  
+
+- **代码中的作用**：`Pair = pair<WeightType, int>` 表示 “一个权重（距离） + 一个顶点索引” 的组合，目的是把 “到某个顶点的距离” 和 “顶点编号” 绑定在一起，方便优先队列排序。
+
+（2）`priority_queue`（优先队列）详解
+
+- **本质**：优先队列是一种 “特殊的队列”，队列的特点是 “先进先出”，但优先队列会**根据元素的优先级自动排序**，每次取出的都是优先级最高的元素（默认是最大的元素）。
+
+- **语法**：`priority_queue<元素类型, 底层容器类型, 比较规则>`：
+
+  - 第一个参数：队列中存储的元素类型（这里是我们定义的 `Pair`）；
+
+  - 第二个参数：优先队列的底层实现容器（必须是顺序容器，默认是 `vector`，所以这里写 `vector<Pair>` 是显式指定，和默认一致）；
+
+  - 第三个参数：比较规则（决定优先级）：
+
+    - 默认：`less<T>` → 最大优先队列（数值大的元素优先级高，堆顶是最大值）；
+    - `greater<T>` → 最小优先队列（数值小的元素优先级高，堆顶是最小值）。
+
+    
+
+  
+
+- **代码中的作用**：
+
+  - 我们需要每次找到 “当前距离起点最近的未处理顶点”，所以必须用**最小优先队列**（`greater<Pair>`）；
+  - 优先队列排序规则：`pair` 的比较是**先比第一个元素，第一个相等再比第二个**。这里 `Pair` 的第一个元素是距离（`WeightType`），所以队列会按 “距离从小到大” 排序，堆顶永远是当前距离起点最近的顶点。
+
+  
+
+- **核心操作**：
+
+  - `pq.push({0, startIndex})`：把起点（距离 0，索引 `startIndex`）加入队列；
+  - `pq.top()`：获取堆顶元素（不删除）；
+  - `pq.pop()`：删除堆顶元素。
+
+  
+
+3. 主循环（Dijkstra 核心逻辑）
+
+```c++
+while (!pq.empty())
+{
+    // 取出当前距离最小的顶点
+    WeightType currentDist = pq.top().first; // 取pair的第一个元素（距离）
+    int v_idx = pq.top().second; // 取pair的第二个元素（顶点索引）
+    pq.pop(); // 从队列中删除该顶点
+
+    // 跳过：如果当前记录的距离比已知的最短距离大，说明是过时的信息
+    if (currentDist > result.dist[v_idx])
+    {
+        continue;
+    }
+
+    // 遍历当前顶点v的所有邻接边
+    EdgeNode<WeightType> *edge = this->vertexArry[v_idx].firstOut;
+    while (edge != nullptr)
+    {
+        int u_idx = edge->tailIndex; // 邻接顶点u的索引
+        WeightType weight = edge->weight; // 边v→u的权重
+
+        // 松弛操作：如果经过v到u的路径更短，就更新
+        if (result.dist[u_idx] > result.dist[v_idx] + weight)
+        {
+            result.dist[u_idx] = result.dist[v_idx] + weight; // 更新距离
+            result.path[u_idx] = v_idx; // 记录u的前驱是v
+            pq.push({result.dist[u_idx], u_idx}); // 把更新后的u加入队列
+        }
+        edge = edge->headEdge; // 遍历下一条邻接边
+    }
+}
+```
+
+- **关键容器操作**：
+  1. `pq.top().first` / `pq.top().second`：取出堆顶 `pair` 的两个元素（距离和顶点索引），这是 `pair` 最核心的访问方式；
+  2. 松弛操作后 `pq.push({result.dist[u_idx], u_idx})`：把更新后的（新距离，顶点 u）加入优先队列 —— 即使 u 已经在队列中，也不需要删除旧的，后续处理时发现 `currentDist > result.dist[v_idx]` 会直接跳过，这是 Dijkstra 用优先队列实现的常规写法；
+  3. `result.dist` 和 `result.path` 作为 `vector`，通过下标 `[u_idx]` 直接访问和修改元素，这是 `vector` 最常用的操作（随机访问）。
+
+##### **关键代码解读**
+
+`currentDist > result.dist[v_idx] 会直接跳过，这是 Dijkstra 用优先队列实现的常规写法`
+
+当 `currentDist > result.dist[v_idx]` 时要跳过当前顶点的处理，这确实是 Dijkstra 算法用优先队列实现时最容易困惑的点#
+
+###### 核心原因先讲结论
+
+优先队列中**可能存在同一个顶点的多个 “旧 / 过时” 记录**，`currentDist > result.dist[v_idx]` 这个判断就是用来过滤这些无效记录的 —— 当我们从队列中取出某个顶点时，如果它记录的距离已经不是我们已知的最短距离了，说明这个记录已经没用了，直接跳过即可。
+
+###### 用具体例子拆解逻辑
+
+假设我们的图有顶点 A (0)、B (1)、C (2)，边的权重如下：
+
+- A→B：权重 5
+- A→C：权重 10
+- B→C：权重 1
+
+步骤 1：初始化
+
+- 起点是 A (0)，`result.dist = [0, ∞, ∞]`（∞ 表示无穷大）
+- 优先队列 `pq` 中加入 `(0, 0)`（距离 0，顶点 0）
+
+步骤 2：第一次处理队列
+
+- 取出队首 `(0, 0)`（currentDist=0，v_idx=0），`0 == result.dist[0]`，不跳过；
+
+- 遍历 A 的邻接边：
+
+  - A→B：更新 `result.dist[1] = 0+5=5`，队列加入 `(5, 1)`；
+  - A→C：更新 `result.dist[2] = 0+10=10`，队列加入 `(10, 2)`；
+
+  
+
+- 此时队列中有 `(5, 1)`、`(10, 2)`。
+
+步骤 3：第二次处理队列
+
+- 取出队首 `(5, 1)`（currentDist=5，v_idx=1），`5 == result.dist[1]`，不跳过；
+
+- 遍历 B 的邻接边：
+
+  - B→C：原来 `result.dist[2] = 10`，现在 `5+1=6 < 10`，所以更新 `result.dist[2] = 6`，队列加入 `(6, 2)`；
+
+  
+
+- 此时队列中有 `(6, 2)`、`(10, 2)`（注意：C 顶点有两个记录了！）。
+
+步骤 4：第三次处理队列
+
+- 取出队首 `(6, 2)`（currentDist=6，v_idx=2），`6 == result.dist[2]`，不跳过；
+- 遍历 C 的邻接边（假设无），处理结束；
+- 此时队列中还剩 `(10, 2)`。
+
+步骤 5：第四次处理队列（关键！）
+
+- 取出队首 `(10, 2)`（currentDist=10，v_idx=2）；
+
+- 此时检查：`10 > result.dist[2] (6)` → 条件成立，直接跳过；
+
+- 为什么要跳过？
+
+  - 这个 `(10, 2)` 是**早期的旧记录**（A→C 直接走的距离），但我们已经找到了更短的路径（A→B→C，距离 6），并且已经处理过 C 顶点了；
+  - 如果不跳过，会重复处理 C 的邻接边（即使没有），甚至可能错误地更新距离（但这里已经是最短了，不会更新），纯粹浪费计算资源。
+
+  
+
+###### 为什么队列中会出现重复的顶点记录？
+
+因为 Dijkstra 算法的**松弛操作**：每当我们找到一个顶点的更短路径时，都会把 “新距离 + 顶点” 重新加入队列，而不会删除队列中已有的 “旧距离 + 顶点”。
+
+- 优先队列的特性是 “只能取堆顶、不能删除中间元素”，所以无法高效删除旧记录；
+- 与其费力删除，不如在取出时做一次判断：如果当前记录的距离比已知的最短距离大，说明这是过时的，直接跳过即可 —— 这是工程上 “空间换时间” 的最优选择。
