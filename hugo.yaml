@@ -19,8 +19,15 @@ params:
   ShowWordCount: true
   # 是否显示分享按钮
   ShowShareButtons: true
-  # 分享按钮配置
-  # ShareButtons: ["linkedin", "twitter"]
+
+  # --- 添加这两行 ---
+  # 是否显示目录
+  ShowToc: true
+  
+  # 修改这里：改为 false，表示默认是折叠起来的
+  TocOpen: false   # <-- 必须设为 true，否则 JS 抓取不到内容
+  # -----------------
+
   # 是否禁用主题切换按钮
   disableThemeToggle: false
   assets:
@@ -75,3 +82,4 @@ outputs:
     - HTML
     - RSS
     - JSON # 必须，用于搜索功能
+

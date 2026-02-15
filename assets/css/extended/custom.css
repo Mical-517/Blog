@@ -534,8 +534,8 @@ body {
 /* Header Styles */
 .header {
     background: rgba(20, 20, 20, 0.75) !important;
-    backdrop-filter: blur(15px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -650,6 +650,52 @@ body {
 /* Hide original home-info */
 .home-info {
     display: none !important;
+}
+
+/* === PaperMod 自带目录美化 === */
+.toc {
+    background: rgba(30, 30, 30, 0.6) !important; /* 半透明背景 */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin: 20px 0 30px 0; /* 上下间距 */
+    max-width: fit-content; /* 宽度自适应内容，不要占满整行 */
+    min-width: 200px;
+}
+
+.toc summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #e1e1e1;
+    margin-bottom: 5px;
+    list-style: none; /* 去掉默认的小三角，或者保留看个人喜好 */
+}
+
+.toc summary:hover {
+    color: #fb7299; /* 悬停粉色 */
+}
+
+.toc .inner {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.toc ul {
+    padding-left: 20px;
+}
+
+.toc a {
+    color: #a0a0a0;
+    text-decoration: none;
+    transition: color 0.2s;
+    line-height: 1.8;
+}
+
+.toc a:hover {
+    color: #fb7299; /* 链接悬停粉色 */
+    text-decoration: underline;
 }
 
 /* Responsive */
