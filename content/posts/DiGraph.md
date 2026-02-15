@@ -853,3 +853,71 @@ while (!pq.empty())
 
 - 优先队列的特性是 “只能取堆顶、不能删除中间元素”，所以无法高效删除旧记录；
 - 与其费力删除，不如在取出时做一次判断：如果当前记录的距离比已知的最短距离大，说明这是过时的，直接跳过即可 —— 这是工程上 “空间换时间” 的最优选择。
+
+### 多源最短路径
+
+多源最短路径算法比较简单利用了三个for循环
+
+```c++
+// WFI算法实现多源最短路径
+template <class DataType, class WeightType>
+typename DiGraph<DataType, WeightType>::WFIResult
+DiGraph<DataType, WeightType>::WFIalgorithm()
+{
+    WFIResult result;
+    int vNum = this->vertexNum;
+    // 初始化result
+    result.dist.resize(vNum, vector<WeightType>(vNum, numeric_limits<WeightType>::max()));
+    result.path.resize(vNum, vector<int>(vNum, -1));
+    vector<vector<WeightType>> adjMatrix = this->toAdjacencyMarix();
+
+    // 初始化 dist 和 path 矩阵
+    for (int i = 0; i < vNum; i++)
+    {
+        for (int j = 0; j < vNum; j++)
+        {
+            if (i == j)
+            {
+                result.dist[i][j] = 0;
+            }
+            else if (adjMatrix[i][j] != numeric_limits<WeightType>::max())
+            {
+                result.dist[i][j] = adjMatrix[i][j];
+                result.path[i][j] = i; // 从 i 到 j 的直接路径，j 的前驱是 i
+            }
+        }
+    }
+
+    // Floyd-Warshall 算法核心
+    // k 是中转顶点
+    for (int k = 0; k < vNum; k++)
+    {
+        // i 是起始顶点
+        for (int i = 0; i < vNum; i++)
+        {
+            // j 是结束顶点
+            for (int j = 0; j < vNum; j++)
+            {
+                // 防止溢出
+                if (result.dist[i][k] != numeric_limits<WeightType>::max() &&
+                    result.dist[k][j] != numeric_limits<WeightType>::max() &&
+                    result.dist[i][j] > result.dist[i][k] + result.dist[k][j])
+                {
+                    result.dist[i][j] = result.dist[i][k] + result.dist[k][j];
+                    // 路径从 i -> ... -> k -> ... -> j
+                    // 所以到达 j 的前驱节点和从 k 到达 j 的前驱节点是一样的
+                    result.path[i][j] = result.path[k][j];
+                }
+            }
+        }
+    }
+    return result;
+}
+```
+
+本质就是相当于单元最短路径，但是是利用二维数组来更新顶点之间的最短距离，以及每个节点的前驱节点
+
+主要利用了：
+
+1. 类似单源最短路径返回一个类内嵌套的结构体
+2. **初始化方法**
