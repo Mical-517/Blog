@@ -371,15 +371,16 @@ body {
     text-align: center;
 }
 
-/* Article Detail Glassmorphism */
+/* Article Detail Glassmorphism - Modified to Solid Background for better readability */
 .post-single {
-    background: rgba(20, 20, 20, 0.75) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background: #1e1e1e !important; /* 纯色深背景，不再透明 */
+    /* 移除毛玻璃滤镜 */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: var(--card-radius) !important;
     padding: 40px !important;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
     margin-bottom: 30px !important;
 }
 
@@ -393,6 +394,13 @@ body {
 .post-content {
     color: var(--text-main) !important;
     line-height: 1.8 !important;
+}
+
+/* Make bold text red and highlighted */
+.post-content strong, 
+.post-content b {
+    color: #ff5555 !important;
+    font-weight: 700;
 }
 
 .post-title {
