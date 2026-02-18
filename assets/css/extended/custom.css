@@ -2,14 +2,17 @@
     --sidebar-width: 280px;
     --card-radius: 16px;
     --primary-bg: #1a1a1a;
-    --card-bg: rgba(36, 36, 36, 0.8); /* 半透明卡片背景 */
+    --card-bg: rgba(36, 36, 36, 0.8);
+    /* 半透明卡片背景 */
     --text-main: #e1e1e1;
     --text-dim: #a0a0a0;
 }
 
-html, body {
+html,
+body {
     background-color: var(--primary-bg) !important;
-    background-image: url("/images/background.jpg") !important; /* 确保路径正确 */
+    background-image: url("/images/background.jpg") !important;
+    /* 确保路径正确 */
     background-attachment: fixed !important;
     background-size: cover !important;
     background-position: center !important;
@@ -99,7 +102,8 @@ body {
 }
 
 .post-entry:hover .entry-header h2 {
-    color: #fb7299; /* Use a brand color for hover */
+    color: #fb7299;
+    /* Use a brand color for hover */
 }
 
 .entry-content {
@@ -121,7 +125,8 @@ body {
     margin-bottom: 15px;
 }
 
-.cat-item, .tag-item {
+.cat-item,
+.tag-item {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -213,7 +218,8 @@ body {
 .archive-month-list::before {
     content: "";
     position: absolute;
-    left: 85px; /* Adjust to align with dots */
+    left: 85px;
+    /* Adjust to align with dots */
     top: -20px;
     bottom: -30px;
     width: 1px;
@@ -280,6 +286,7 @@ body {
     border-radius: 8px;
     margin-left: -10px;
 }
+
 .entry-footer {
     display: flex;
     flex-direction: column;
@@ -346,11 +353,13 @@ body {
     .post-entry-wrapper {
         flex-direction: column-reverse;
     }
+
     .post-entry-cover {
         flex: 0 0 auto;
         max-width: 100%;
         width: 100%;
     }
+
     .post-entry-cover img {
         height: 200px !important;
     }
@@ -373,7 +382,8 @@ body {
 
 /* Article Detail Glassmorphism - Modified to Solid Background for better readability */
 .post-single {
-    background: #1e1e1e !important; /* 纯色深背景，不再透明 */
+    background: #1e1e1e !important;
+    /* 纯色深背景，不再透明 */
     /* 移除毛玻璃滤镜 */
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -397,7 +407,7 @@ body {
 }
 
 /* Make bold text red and highlighted */
-.post-content strong, 
+.post-content strong,
 .post-content b {
     color: #ff5555 !important;
     font-weight: 700;
@@ -468,7 +478,8 @@ body {
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: rgba(255, 255, 255, 0.08); /* Slightly brighter default */
+    background: rgba(255, 255, 255, 0.08);
+    /* Slightly brighter default */
     border-radius: 10px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin: 0 !important;
@@ -480,6 +491,7 @@ body {
     background: #24292e !important;
     border-color: #444;
 }
+
 .sidebar-social a[title~="Github"]:hover svg {
     fill: #fff !important;
 }
@@ -488,6 +500,7 @@ body {
     background: #fb7299 !important;
     border-color: #fb7299;
 }
+
 .sidebar-social a[title~="Bilibili"]:hover svg {
     fill: #fff !important;
 }
@@ -496,6 +509,7 @@ body {
     background: #ff0000 !important;
     border-color: #ff0000;
 }
+
 .sidebar-social a[title~="Youtube"]:hover svg {
     fill: #fff !important;
 }
@@ -508,7 +522,8 @@ body {
 .sidebar-social a svg {
     width: 22px;
     height: 22px;
-    fill: #a0a0a0; /* Dimmer default to make hover pop more */
+    fill: #a0a0a0;
+    /* Dimmer default to make hover pop more */
     transition: fill 0.3s ease;
 }
 
@@ -586,16 +601,19 @@ body {
     text-decoration: none;
     font-size: 15px;
     font-weight: 500;
-    padding: 5px 15px; /* Reduced vertical padding */
+    padding: 5px 15px;
+    /* Reduced vertical padding */
     border-radius: 8px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     border: 1px solid transparent;
-    height: 32px; /* Fixed height to match search box and stay centered */
+    height: 32px;
+    /* Fixed height to match search box and stay centered */
 }
 
-#menu li a:hover, #menu li a.active {
+#menu li a:hover,
+#menu li a.active {
     color: #fff;
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.1);
@@ -631,7 +649,8 @@ body {
     align-items: center;
     transition: all 0.3s;
     width: 180px;
-    height: 32px; /* Set a fixed height to prevent it from being too tall */
+    height: 32px;
+    /* Set a fixed height to prevent it from being too tall */
 }
 
 .search-box:focus-within {
@@ -662,14 +681,17 @@ body {
 
 /* === PaperMod 自带目录美化 === */
 .toc {
-    background: rgba(30, 30, 30, 0.6) !important; /* 半透明背景 */
+    background: rgba(30, 30, 30, 0.6) !important;
+    /* 半透明背景 */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 15px 20px;
-    margin: 20px 0 30px 0; /* 上下间距 */
-    max-width: fit-content; /* 宽度自适应内容，不要占满整行 */
+    margin: 20px 0 30px 0;
+    /* 上下间距 */
+    max-width: fit-content;
+    /* 宽度自适应内容，不要占满整行 */
     min-width: 200px;
 }
 
@@ -678,11 +700,13 @@ body {
     font-weight: bold;
     color: #e1e1e1;
     margin-bottom: 5px;
-    list-style: none; /* 去掉默认的小三角，或者保留看个人喜好 */
+    list-style: none;
+    /* 去掉默认的小三角，或者保留看个人喜好 */
 }
 
 .toc summary:hover {
-    color: #fb7299; /* 悬停粉色 */
+    color: #fb7299;
+    /* 悬停粉色 */
 }
 
 .toc .inner {
@@ -702,7 +726,8 @@ body {
 }
 
 .toc a:hover {
-    color: #fb7299; /* 链接悬停粉色 */
+    color: #fb7299;
+    /* 链接悬停粉色 */
     text-decoration: underline;
 }
 
@@ -711,13 +736,16 @@ body {
     .container {
         flex-direction: column;
     }
+
     .sidebar {
         width: 100%;
         position: static;
     }
+
     .main {
         max-width: 100%;
     }
+
     .search-box:focus-within {
         width: 180px;
     }
