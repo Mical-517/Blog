@@ -56,6 +56,9 @@ int average=(a^b)>>1+(a&b);
 模版思路就是：
 
 1. 如果一组数据，有一个性质或者说方法，可以将这个组内的元素完整分为两大类或者说范围
+
+   **重新描述条件1**：就是如果有一个函数（或者说方法），当我们把这一组数据当中的某一个数据或者两个数据带入的时候，通过这个方法的返回值与题目条件的限定下，可以知道我们的目标答案在带入数据的左侧还是右侧，此时就是二分法
+
 2. 我们要找的目标数据在这两个范围某个范围的边界上
 
 如果满足这两个性质，就可以尝试使用二分法
@@ -127,6 +130,162 @@ mid=（left+right+1)/2;
 ## 题目练习
 
 ### 1.寻找局部最值问题
+
+[162. 寻找峰值 - 力扣（LeetCode）](https://leetcode.cn/problems/find-peak-element/description/)
+
+思路：
+
+已知条件：
+
+1. 元素类型：int
+2. nums相邻元素不重复（重要）
+3. 峰值定义：就是左右两边的数字大
+4. 数组不有序
+
+边界：就是两边只有一个相邻位置可以比较
+
+
+
+求解：任意一个峰值的下标
+
+
+
+思路：
+
+先判断边界数字是不是峰值，如果不是那就意味着边界是这样的：a[0]到a[1]是向上增长趋势，a[n-2]到a[n-1]是向下增长趋势，从向上到向下，所以中间肯定有一个我们的目标值，所以**我们的目标值的区间是这样的**，两边一个向上，一个向下，所以我们定义一个方法，将数据带入就会得到他是向上还是向下，然后一步一步收缩
+
+
+
+代码：
+
+```c++
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        if(nums.size()==1)
+        {
+            return 0;
+        }
+        //先判断两边
+        if(nums.at(0)>nums.at(1))
+        {
+            return 0;
+        }
+        if(nums.at(nums.size()-1)>nums.at(nums.size()-2))
+        {
+            return nums.size()-1;
+        }
+        //判断中间元素
+        int left=1;
+        int right=nums.size()-2;
+        int mid=0;
+        while(left<right)
+        {
+            mid=(left+right+1)/2;
+            //这里这个条件<就是定义的方法，mid就是判断的数值
+            if(nums.at(mid)<nums.at(mid-1))
+            {
+                right=mid-1;
+            }
+            else
+            {
+                left=mid;
+            }
+        }
+        return left;
+    }
+};
+```
+
+
+
+
+
+### 2.一元三次方程问题
+
+[P1024 [NOIP 2001 提高组\] 一元三次方程求解 - 洛谷](https://www.luogu.com.cn/problem/P1024)
+
+
+
+已知条件：
+
+1. 元素类型double
+2. 数据范围 -100-100，实数范围
+3. *f*(*x*)=0，若存在 2 个数 *x*1 和 *x*2，且 *x*1<*x*2，*f*(*x*1)×*f*(*x*2)<0，则在 (*x*1,*x*2) 之间一定有一个根。
+4. 根与根之差的绝对值 ≥1代表，寻到根的范围大小就是1个单位，两个根之间的距离是>=1，所以为了保证搜寻范围只有一个根，就要保证搜寻范围是一个一个单位来搜寻的
+
+
+
+求解：
+
+满足方程的三个解，要从大到小pailie
+
+
+
+搜寻边界：从i~i+1，如果边界i就是根，则i到i+1就没有必要搜寻了
+
+思路：
+
+因为**根与根之差的绝对值 ≥1，并且从大到小排列**，所以从i=-100开始每一次都是搜寻i~i+1范围内的根
+
+搜寻策略：定义二分方法：*f*(*x*1)×*f*(*x*2)<0，则在 (*x*1,*x*2) 之间一定有一个根，所以f(x)想乘就是定义的函数用来找到目标在那一侧
+
+
+
+```c++
+#include <iostream>
+using namespace std;
+
+double a,b,c,d;
+//带入x得到方程的结果
+double result(double x)
+{
+    return a*x*x*x+b*x*x+c*x+d;
+}
+
+//已知一个范围有根，得到根
+double get(double l,double r)
+{
+    //实数二分
+    double mid=0;
+    while(r-l>0.0001)
+    {
+        mid=(l+r)/2;
+        if(result(mid)*result(l)<0)
+        {
+            r=mid;
+        }
+        else
+        {
+            l=mid;
+        }
+    }
+    return l;
+}
+
+int main()
+{
+    cin>>a>>b>>c>>d;
+    for(int i=-100;i<100;i++)
+    {
+        //先验证范围边界是不是根
+        double y1=result(i),y2=result(i+1);
+        if(!y1)
+        {
+            printf("%.2lf ",1.0*i);
+        }
+        if(y1*y2<0)
+        {
+            printf("%.2lf ",get(i,i+1));
+        }
+    }
+    return 0;
+}
+```
+
+知识点：关于限定小数位数，使用printf打印
+
+
 
 
 
