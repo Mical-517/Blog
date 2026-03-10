@@ -287,13 +287,191 @@ int main()
 
 
 
+## 二分答案的模版写法与使用
+
+模版概述：
+
+就是在一个问题中，题目已给出一个变量y，然后要求一组范围内x的最值问题，**重要的是你能够看出来y与x之间有个函数的对应关系曲线**
+
+![image-20260310124721027](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603101247227.png)
+
+比如上面，y就是与x有关的变量，这里目标值就是y=c，然后有一个**check函数用来输入利用y与x的关系来得到对应的y值，然后根据y是否在有效范围内判断是否在对应的解x是否早有效范围内，没有就使用二分缩小搜寻范围**
 
 
 
+## 题目练习
+
+### 1.木材加工
 
 
 
+[P2440 木材加工 - 洛谷](https://www.luogu.com.cn/problem/P2440)
 
+已知：
+
+1. 元素类型，int
+2. 数据范围：8次方，使用int足够
+3. 每一根原木的长度，以及**至少要切成k段**，注意这里至少，题目虽然没有明说，但是题目提到要切k段，就是说**每段的有效长度x**，至少要保证按照x切能够切的段数要>=k
+
+求解：
+
+每段长度的最大值
+
+
+
+边界：只取一段，最大就是原木中最长的，所以每段长度就是在0~max之间
+
+思路：
+
+是说**每段的有效长度x**，至少要保证按照x切能够切的段数要>=k，这样才能够保证可以有k段，首先确定x，就是每段长度，
+
+y就是可以切的段数，这里y与x关系就是，x变大，y变小，所以曲线线下
+
+看上面模版的第二个图，就是本体的模版
+
+确定二分的有效范围:0~max
+
+代码：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+int n,k;//表示原木数量，小段数量
+long sum=0;//表示和
+
+bool check(int data)
+{
+    if(k*data<=sum)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+int main()
+{
+    cin>>n>>k;
+    int temp;
+    int treeMax=0;
+    cin>>treeMax;
+    sum+=treeMax;
+    /*
+    while(cin>>temp)
+    {
+        if(temp<treeMin)
+        {
+            treeMin=temp;
+        }
+        sum+=temp;
+    }
+    */
+    int left=0;
+    int right=treeMax;
+    while(left<right)
+    {
+        int mid=(right+left+1)/2;
+        if(check(mid))
+        {
+            left=mid;
+        }
+        else
+        {
+            right=mid-1;
+        }
+    }
+    cout<<left<<endl; 
+}
+
+```
+
+
+
+### 2.跳石头
+
+[P2678 [NOIP 2015 提高组\] 跳石头 - 洛谷](https://www.luogu.com.cn/problem/P2678#ide)
+
+
+
+已知：
+
+1. L，N，M，总距离，石头总数，可以石头的最大数
+2. 距离是int类型，因为一开始设置Di就是整数
+3. D[i]，表示第i个石头到起点距离
+
+
+
+求解：
+
+如果移走的石头最大数量是M，想要是相邻两个石头之间的最小距离最大化，请输出这个最小距离的最大化值
+
+
+
+边界范围：D[i]，只是从第i个石头到起点距离，但是从最后一个石头跳到终点也有一段距离，如果抽走所有石头，则最短距离最大化就是L，所以答案就在0~L之间
+
+
+
+思路：
+
+首先，要求一个最大值，并且 1.这个最短跳跃距离与所要已走的石头数有关系：距离大，移走的石头数就多   2.发现最多移走M块，所以移动块数y有个有效范围就是y<=M,这里就满足二分答案了，要求的和已知条件有关系，并且，一直条件有有效范围，所以x就一定也有有效范围，接下来就是在x有效范围选取一个最大值，找到一个函数来定义y与x的关系，发现，当我们确定x后，就可以对所有石头从头遍历，如果从begin到end距离小于x，就移动当前end所处的石头，end++
+
+```c++
+#include <iostream>
+using namespace std;
+
+int L,N,M;//距离，岩石数目，最多移走数目
+int D[50005];//还要考虑第一块与最后一块
+bool check(int distance)
+{
+    int begin=0,end=begin+1;
+    int num=0;
+    while(end<=N+1)
+    {
+        if(D[end]-D[begin]<distance)
+        {
+            num++;
+            end++;
+        }
+        else
+        {
+            begin=end;
+            end++;
+        }
+    }
+    if(num<=M) return true;
+    else return false;
+}
+
+
+int main()
+{
+    cin>>L>>N>>M;
+    for(int i=1;i<=N;i++)
+    {
+        cin>>D[i];
+    }
+    D[0]=0;
+    D[N+1]=L;
+    int left=0,right=L;
+    while(left<right)
+    {
+        int mid=(left+right+1)>>1;
+        if(check(mid))
+        {
+            left=mid;
+        }
+        else
+        {
+            right=mid-1;
+        }
+    }
+    cout<<left<<endl;
+}
+```
 
 
 
