@@ -291,13 +291,13 @@ int main()
 
 模版概述：
 
-就是在一个问题中，题目已给出一个变量y，然后要求一组范围内x的最值问题，**重要的是你能够看出来y与x之间有个函数的对应关系曲线**
+1. 就是在一个问题中，题目已给出一个变量y，然后要求一组范围内x的最值问题，**重要的是你能够看出来y与x之间有个函数的对应关系曲线**
 
 ![image-20260310124721027](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603101247227.png)
 
 比如上面，y就是与x有关的变量，这里目标值就是y=c，然后有一个**check函数用来输入利用y与x的关系来得到对应的y值，然后根据y是否在有效范围内判断是否在对应的解x是否早有效范围内，没有就使用二分缩小搜寻范围**
 
-
+2. **还有一种就是y与x的关系是是否型的**，就是y的意义不是一个有效范围，而是就两种状态：是或者不是看第四题
 
 ## 题目练习
 
@@ -472,6 +472,283 @@ int main()
     cout<<left<<endl;
 }
 ```
+
+
+
+### 3.聪明的质检员
+
+[P1314 [NOIP 2011 提高组\] 聪明的质监员 - 洛谷](https://www.luogu.com.cn/problem/P1314)
+
+已知：
+
+1. 一定要确认类型，看到y是要加在一起，那么就让位longlong型，s也为longlogn
+2. n，m，s意义
+3. 检验值yi的意义
+
+求：
+
+s-y绝对值的最小值
+
+
+
+理解题意：
+
+有一组石头，把他们分为m个区间，注意区间可以重复，计算每个区间里面符合要求（w>=W)的数量之和然后乘以对应的价值之和，得到的检验值y想加然后与s相减，求出最小值
+
+
+
+思路：
+
+我们可以发现，检验标准w越小，表示岩石越容易符合要求，所以y就越大，这里，y就随着w增大而增大，这里y的有效范围不是固定的一边，因为真正的判断条件是在一个W，对应的y要小于s就可以，所以我们可以自己选择s的上边是有效，还是下边是有效
+
+**关键**：关于yi如何算，简单理解就是要找到一个区间符合条件的石头数量，然后乘以他们的价值之和，如果常规方法，就是对于m个区间每个都要计算一遍得到yi，但是我们知道区间是可以重复的，所以这是有些在前面已经判定的石块，还要再次判定一次，这是不必要的浪费，**优化：**我们可以采用递推的方法，递推做的不是 “算最终结果”，而是 **“存下所有可能的中间结果”**，递推的核心是 **“用前一步的结果，推导后一步的结果”**。
+
+这道题的递推核心是 **“前缀和递推”**，我们拆解一下它的思维逻辑：
+
+#### 1. 问题拆解
+
+我们需要快速得到：**任意区间 \**[l,r]\** 内满足 \**wj≥W\** 的矿石数量** 和 **对应价值和**。
+
+如果不预处理，每次算区间都要遍历 l 到 r，太慢。
+
+#### 2. 递推的核心思想：把 “区间问题” 转化为 “前缀差问题”
+
+定义两个数组：
+
+- sn[i]：前 i 个矿石中，重量 ≥W 的矿石**总数量**。
+- sv[i]：前 i 个矿石中，重量 ≥W 的矿石**总价值**。
+
+**递推公式（状态转移）**：
+
+
+
+```c++
+// 第i个矿石满足条件，就继承前i-1的结果并+1/+价值；否则直接继承前i-1的结果
+if (w[i] >= W) {
+    sn[i] = sn[i-1] + 1;
+    sv[i] = sv[i-1] + v[i];
+} else {
+    sn[i] = sn[i-1];
+    sv[i] = sv[i-1];
+}
+```
+
+#### 3. 区间查询（O (1)）
+
+有了 sn 和 sv，任意区间 [l,r] 的结果就是**前缀差**：
+
+- 数量：sn[r]−sn[l−1]
+- 价值和：sv[r]−sv[l−1]
+
+#### 4. 递推的 “巧妙” 之处
+
+你用递推做的不是 “算最终结果”，而是 **“存下所有可能的中间结果”**。
+
+-----
+
+
+
+什么时候该用递推？只要满足以下 **3 个核心条件**，优先选递推：
+
+#### 1. 问题具有**明确的状态转移关系**
+
+即：**第 \**i\** 步的结果 = 第 \**i−1\** 步的结果 + 一个可计算的增量**。
+
+- 本题：`sn[i]`（状态）由 `sn[i-1]` 和第 i 个矿石是否满足条件决定。
+- 经典场景：斐波那契数列、前缀和 / 后缀和、差分恢复、动态规划（DP）的状态转移。
+
+#### 2. 需要**预处理 / 累积统计**
+
+当题目要求快速回答 “区间查询” 类问题（如区间和、区间最大值、区间计数）时，递推是预处理的最优解。
+
+- 例如：区间和查询用前缀和（递推）、区间最值用 ST 表（递推）、差分数组还原（递推）。
+
+#### 3. 数据量较大，需规避暴力超时
+
+递推的时间复杂度通常是线性的 O(n)，能轻松处理 105∼106 级别的数据；而暴力法往往是 O(n2)，大数据下必超时。
+
+```c++
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <cstdlib>
+using namespace std;
+
+using LL=long long;
+using Pair=pair<int,int>;
+//岩石数目，区间数目，比较值
+int n,m;
+LL s;
+//最小值
+LL ans=1e18;
+
+vector<Pair> stones;
+vector<Pair> ranges;
+
+bool check(int w)
+{
+    //前缀和（满足条件）
+    vector<LL> w_count(n+1,0);
+    vector<LL> v_count(n+1,0);
+    for(int i=1;i<=n;i++)
+    {
+        w_count[i]=w_count[i-1];
+        v_count[i]=v_count[i-1];
+        if(stones[i-1].first>=w)
+        {
+            w_count[i]++;
+            v_count[i]+=stones[i-1].second;
+        }
+    }
+    //计算y
+    LL y=0;
+    for(int i=0;i<m;i++)
+    {
+        int l=ranges[i].first;
+        int r=ranges[i].second;
+        y+=(w_count[r]-w_count[l-1])*(v_count[r]-v_count[l-1]);
+    }
+    ans=min(ans,llabs(y-s));
+    return y<=s;
+}
+
+
+int main()
+{
+    cin>>n>>m>>s;
+    stones.resize(n);
+    for(int i=0;i<n;i++)
+    {
+        cin>>stones[i].first>>stones[i].second;
+    }
+    ranges.resize(m);
+    for(int i=0;i<m;i++)
+    {
+        cin>>ranges[i].first>>ranges[i].second;
+    }
+    int l=0,r=1000000;
+    while(l<r)
+    {
+        int mid=(l+r)>>1;
+        if(check(mid)) r=mid;
+        else l=mid+1;
+    }
+    cout<<ans<<endl;
+    return 0;
+}
+```
+
+
+
+### 4.借教室
+
+[P1083 [NOIP 2012 提高组\] 借教室 - 洛谷](https://www.luogu.com.cn/problem/P1083)
+
+已知：
+
+1. **下标从1开始**
+2. n，m意义，d,t,s
+3. 整数，对于和的变量使用longlong
+
+求解：
+
+这些订单是否会不满足教室容量，然后输出错误的编号
+
+
+
+思路：
+
+1. 容易想到暴力枚举，我们可以依次遍历每个订单，然后遍历每个订单的天数，用已有的教室依次减去，如果<0就表示错误，但是显示这是O(nm)，超时的，
+
+2. 发现当订单数增加时显然各个天需要的教室会增加，所以随着订单数增加所需要的订单数总有一次会超过限制，所以如果y表示教室是否够，所以这就是**状态二分**，因为y就只有两种状态，可以或者不可以。并且题目还说了订单是顺序执行的，这天然满足二分的性质，因为教室的数量一定递减的。
+
+   现在定义一个函数：输入订单编号，判断是否满足教室容量，所有我们就需要一个数组表示从第一个任务到当前任务每天所需要的教室总量，显然这一段描述就是当前第 \**i\** 步的结果 = 第 \**i−1\** 步的结果 + 一个可计算的增量,所以可以使用递推，但是我们发现这里递推还是一个O(mn),**这里就引出了一个新的递推方法**：详细看视频：[A06 二分答案 最好的套路_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV128411M7GT/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=86d06d10a03dcd75fe3a632194bc3c3c)35分钟
+
+
+
+```c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int n,m;
+vector<int> d;
+vector<int> s;
+vector<int> t;
+vector<long> days;
+vector<int> room;
+bool check(int number)
+{
+    days.clear();
+    days.resize(n+2,0);
+    //计算前缀和
+    for(int i=1;i<=number;i++)
+    {
+        int l=s[i];
+        int r=t[i];
+        days[l]+=d[i];
+        days[r+1]-=d[i];
+    }
+    //开始求和
+    for(int i=1;i<=n;i++)
+    {
+        days[i]+=days[i-1];
+    }
+    
+    for(int i=1;i<=n;i++)
+    {
+        if(days[i]>room[i]) return false;
+    }
+    return true;
+}
+
+int main()
+{
+    cin>>n>>m;
+    room.resize(n+1,0);
+    days.resize(n+2,0);
+    for(int i=1;i<=n;i++)
+    {
+        cin>>room[i];
+    }
+    s.resize(m+1,0);
+    d.resize(m+1,0);
+    t.resize(m+1,0);
+    for(int i=1;i<=m;i++)
+    {
+        cin>>d[i]>>s[i]>>t[i];
+    }
+    int left=0,right=m;
+    while(left+1<right)
+    {
+        int mid=(left+right)>>1;
+        if(check(mid))
+        {
+            left=mid;
+        }
+        else
+        {
+            right=mid;
+        }
+    }
+    if(check(left+1))
+    {
+        cout<<0<<endl;
+        
+    }
+    else
+    {
+        cout<<-1<<endl<<left+1;
+    }
+    return 0;
+}
+```
+
+
+
+
+
+
 
 
 
