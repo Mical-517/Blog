@@ -746,6 +746,144 @@ int main()
 
 
 
+### 5.刺杀大使
+
+[P1902 刺杀大使 - 洛谷](https://www.luogu.com.cn/problem/P1902)
+
+已知：
+
+1. n行m列，下标从一开始
+2. 类型为int
+3. 只要到达第n行任意一个0其他的0就都可以到达
+4. 到达第n行路径上的最大值（不是和）是一个士兵受伤的最大值，部队受伤的最大值是士兵当中受伤的最大值（就是每条路线的最大值相互比较）
+
+求解：部队受伤的最小值
+
+
+
+思路：
+
+这就是典型的最大值最小化问题，我们发现，对与部队受伤的值x，将y设置为可以到达第n行，这里就有一个关系了，就是说如果在部队受伤为x的情况下，如果可以到达第n行，就代表这条路线的最大值<=x，随着x的增大，容错也就增大。当x在端点的时候，y恰好表示可以通行，无疑就是问题的解
+
+
+
+与借教室类型相同，y都是是否型
+
+```c++
+#include <iostream>
+#include <vector>
+#include <cstring>
+using namespace std;
+//方向
+int dx[]{-1,0,1,0};
+int dy[]{0,1,0,-1};
+int n=1001,m=1001;
+int maze[1001][1001];
+bool visit[1001][1001];
+
+bool dfs(int x,int y,int injury)
+{
+    if(x==n) return true;
+    visit[x][y]=true;
+    //四个方向探索
+    for(int i=0;i<4;i++)
+    {
+        int a=x+dx[i];
+        int b=y+dy[i];
+        if(a>=1&&b>=1&&a<=n&&b<=m&&visit[a][b]==false&&maze[a][b]<=injury)
+        {
+            if(dfs(a,b,injury)) return true;
+        }
+    }
+    return false;
+}
+
+
+
+int main()
+{
+    cin>>n>>m;
+    for(int i=1;i<=n;i++)
+    {
+        for(int j=1;j<=m;j++)
+        {
+            cin>>maze[i][j];
+            visit[i][j]=false;
+        }
+    }
+    int left=0,right=1000;
+    int mid=0;
+    while(left<right)
+    {
+        memset(visit,false,sizeof(visit));
+        mid=(left+right)>>1;
+        if(dfs(1,1,mid)) right=mid;
+        else left=mid+1;
+    }
+    cout<<left<<endl;
+    
+    return 0;
+}
+```
+
+
+
+### 6.银行贷款
+
+[P1163 银行贷款 - 洛谷](https://www.luogu.com.cn/problem/P1163)
+
+已知：
+
+1. 贷款金额，还款金额long，mounth是int
+2. **注意他说的是每月固定偿还**，所以说算利息的时候，是按照换一部分之后的金额算的
+
+
+
+求解：利率
+
+思路：
+
+题目中有一个不得不，这表示每月最低还款金额，所以说如果将还款金额设定为y，那么y就要>=wo,将利率设为x，那么随着x增加，最低还款金额就要上升，所以y随x增大而增大，所以这是一个利率最小值最大化问题，当利率足够小的时候，他在w0情况下当然可以还清，所以check函数，就是监测，在当前利率下，如果还完mounth之后，如果还剩，就表示利率taida
+
+```c++
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+long amount,interestAmount;
+int mounth;
+
+bool check(double interest)
+{
+    double sum=amount;
+    for(int i=0;i<mounth;i++)
+    {
+        sum=sum*(1+interest)-interestAmount;
+    }
+    if(sum<=0)
+        return true;
+    else return false;
+}
+int main()
+{
+    cin>>amount>>interestAmount>>mounth;
+    double left=0,right=3.0;
+    while(left<right)
+    {
+        double mid=(left+right+0.001)/2;
+        if(check(mid)) left=mid;
+        else right=mid-0.001;
+    }
+    
+    cout<<fixed<<setprecision(1);
+    left*=100;
+    cout<<left<<endl;
+    return 0;
+}
+
+
+```
+
 
 
 

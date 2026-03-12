@@ -97,5 +97,89 @@ lang: ''
 
 
 
+# 条款02：尽量使用const，enum，inline代替#define
+
+原因：因为编译器的原因，可能这个记号名称没有被编译器看见
+
+```c++
+//解决之道：用一个常来那个代替宏
+const double TEST=1.233;
+```
+
+当我们使用常量替换宏有两种特殊情况：
+
+1. 定义常量指针，需要将指针本身声明为const，指向的对象一般也是const
+
+2. 对与class专属常量，**为了将常量的作用限定在class内部**，我们就要将他成为class的一个成员，**并且要保证只生成一份实体，所以要声明为static**
+
+   ```c++
+   class test
+   {
+     	public:
+       static const int Num=5;
+   };
+   //注意这里类内的Num通常为声明式（会根据编译器的来判断），所以最好在一个实现文件内部显示定义
+   const int test::num;//为什么没有赋值？，因为已经在声明时候，获得初始值
+   //如果有些编译器不允许声明式赋值，就可以定义式赋值
+   
+   class test
+   {
+       public:
+       static const int Num=5;
+       int arry[Num];	//错误，因为此时Num只是声明，但是arry要求编译期就要知道大小
+       //解决：使用enum将Num与整数关联，或者使用static contexpr编译期常量
+       enum {Num=5};
+   }
+   ```
+
+
+
+# 条款03：尽可能使用const
+
+首先const可以有语义约束（不可更改）
+
+最重要的是const在成员函数上的使用
+
+将const应用于成员函数的目的，是为了确认该成员函数可用于const对象身上，这一类对象通常之所以要const，基本有两个原因：第一，它们被class接口比较容易被解释。这是因为，得知有哪个函数可以对const对象做哪个函数的调用，很重要。第二，它们使“操作const对象”变为可能。这里偷个懒编译器是大功臣，因为如条款20所言，改善C++程序效率的一个根本办法是以pass by reference-to-const方式传值给对象，而此时不可用的原因是，我们有const成员函数用来取或修改（并非修改本身的）的const对象。
+
+```c++
+class TextBook
+{
+public:
+    // 两个版本的[]
+    const char &operator[](size_t position) const
+    {
+        cout << "constVersion" << endl;
+        return str.at(position);
+    }
+    char &operator[](size_t position)
+    {
+        cout << "non-constVersion" << endl;
+        return str.at(position);
+    }
+
+private:
+    string str{"testStr"};
+};
+```
+
+**要注意的是：**，避难一起遵守bitwise-const原则，这表明是，**对与一个const函数而言，**，不允许在内部修改类的成员变量
+
+解决办法：将要修改的成员变量修改为mutable（可变的）
+
+
+
+请记住
+
+■将某些东西声明为const可帮助编译器识别错误用法。const可被施加于任何作用域内的对象、函数参数、函数返回类型、成员函数体。
+
+■编译器强制实施blwise constness,但你编写程序时应该使用“概念上的常量性”(conceptual constness)。
+
+■当const和non-const成员函数有着实质等价的实现时，令non-const版本调用const版本可避免代码重复。
+
+
+
+
+
 
 
