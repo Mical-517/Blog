@@ -884,9 +884,99 @@ int main()
 
 ```
 
+## 总结
+
+![image-20260313120211023](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603131202213.png)
 
 
 
+# 三. 前缀和题目
+
+
+
+## 1. 一维前缀和
+
+概念理解：
+
+![image-20260313141257174](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603131412326.png)
+
+
+
+就是如果题目对与一个区间想加很多次，但是没有要求我们去求过程中的值，只是要求我们计算最后的值，此时，这个方法比较有用。还有一种方法是如果在多个区间**加上固定的一个值，此时有一种特殊的前缀和的求法，类似二.4借教室**
+
+## 2.二维前缀和
+
+![image-20260313141922006](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603131419114.png)
+
+
+
+**关键：在关于前缀和的题目中最好下标从一开始，这样可省略判断i<=0情况**
+
+
+
+
+
+## 题目
+
+### 1.求区间和
+
+[P8218 【深进1.例1】求区间和 - 洛谷](https://www.luogu.com.cn/problem/P8218)
+
+就是常规模版用法
+
+### 1.激光炸弹
+
+
+
+[P2280 [HNOI2003\] 激光炸弹 - 洛谷](https://www.luogu.com.cn/problem/P2280)
+
+关键：**虽然题目给出x，y是从0开始，但是我们建模的时候，让他们偏移一维，都从1开始简便后续逻辑判断**
+
+```c++
+#include <iostream>
+using namespace std;
+const int N=5005;
+
+int n,m;
+int v[N][N];
+
+
+
+int main()
+{
+    cin>>n>>m;
+    int x,y,value;
+    for(int i=0;i<n;i++)
+    {
+        cin>>x>>y>>value;
+        //可以让x，y偏移一个单位空出0,0，以便后续方便求前缀和
+        x++;
+        y++;
+        v[x][y]+=value;//同一个位置有多个目标
+    }
+    //计算前缀和
+    int sum[N][N];
+    for(int i=1;i<=5001;i++)
+    {
+        for(int j=1;j<=5001;j++)
+        {
+            sum[i][j]=sum[i-1][j]+sum[i][j-1]-sum[i-1][j-1]+v[i][j];
+        }
+    }
+    //遍历炸弹的位置,以右下角为准
+    int max=0;
+    for(int i=m;i<=5001;i++)
+    {
+        for(int j=m;j<=5001;j++)
+        {
+            int w=sum[i][j]-sum[i-m][j]-sum[i][j-m]+sum[i-m][j-m];
+            max=(max>w)?max:w;
+        }
+    }
+    cout<<max<<endl;
+    return 0;
+}
+```
 
 
 
