@@ -890,7 +890,7 @@ int main()
 
 
 
-# 三. 前缀和题目
+# 三. 前缀和与差分题目
 
 
 
@@ -980,9 +980,263 @@ int main()
 
 
 
+## 3.树上前缀和
+
+![image-20260314175041874](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603141750983.png)
+
+思路理解：
+
+如果要求一个树上前缀和，就要：
+
+1. 实现一个树结构：移步到algorithmB篇（使用链式前向星构建）
+2. **关键：找到这两个节点的最近公共祖先**：[D09 倍增算法 P3379【模板】最近公共祖先（LCA）——信息学奥赛算法_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1vg41197Xh/?spm_id_from=333.337.search-card.all.click&vd_source=86d06d10a03dcd75fe3a632194bc3c3c)
+
+![image-20260314160049392](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603141600561.png)
+
+关键：
+
+![image-20260314180105515](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603141801600.png)
+
+![image-20260314180147771](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603141801876.png)
 
 
 
+
+
+## 题目：
+
+### 1.求和
+
+[P4427 [BJOI2018\] 求和 - 洛谷](https://www.luogu.com.cn/problem/P4427)
+
+思路：
+
+首先构建一个树，发现这是一个多次询问，k次方前缀和的问题，所以，我们可以提前把每个从根节点到当前节点的深度的k次方之和求出来，因为k是不定的，所以干脆把所有情况都罗列出来，就有了s【】【】数组，然后找到最近的公共祖先，使用树上前缀和模版，就可得到x到y路径上所有节点的深度的k次方之和
+
+
+
+问题：
+
+1. 构建树
+2. 如何得到每个节点的从根到当前深度的k次方之和
+3. 如何得到最近最近公共祖先
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+using LL=long long;
+const LL mod=998244353;
+
+//使用链向前向星存储无向图
+const int N=3e5+5;
+int n,m;
+//为什么2*N，因为是无向图，每个边都要存两次
+int h[N],to[2*N],ne[2*N],tot;//节点-边编号，边编号-终点，边编号-相同起点边编号，边编号
+
+int fa[N][22];//fa[x][i]表示x节点向上跳2^i层的祖先节点
+int dep[N];//dep[x]表示x节点深度
+//以上是倍增法求公共祖先的模版，下面两个是针对此题的改进
+LL mi[55];//mi[j]表示儿子节点v此时的dep[v]的j次幂（相当于是一个临时变量）
+LL s[N][55];//s[x][j]表示根节点到x节点之间所有节点深度的j次幂之和
+
+
+void add(int a,int b)
+{
+    to[++tot]=b;
+    ne[tot]=h[a];
+    h[a]=tot;
+}
+
+//当前节点x，父节点f，用来完成fa表，以及计算到当前节点的路径j次幂之和
+//dfs在可以遍历到每个节点，所以可以针对每个节点完善fa表，以及计算前缀和
+void dfs(int x,int f)
+{
+    for(int i=1;i<=20;i++)
+    {
+        fa[x][i]=fa[fa[x][i-1]][i-1];
+    }
+    //遍历x每一个儿子节点
+    for(int i=h[x];i;i=ne[i])
+    {
+        int y=to[i];
+        //不走回头路，只向下去走
+        if(y!=f)
+        {
+            fa[y][0]=x;
+            dep[y]=dep[x]+1;
+            for(int j=1;j<=50;j++)
+            {
+                mi[j]=mi[j-1]*dep[y]%mod;
+            }
+            for(int j=1;j<=50;j++)
+            {
+                s[y][j]=(mi[j]+s[x][j])%mod;
+            }
+            dfs(y,x);
+        }
+    }
+}
+
+//求最近公共祖先
+int lca(int x,int y)
+{
+    if(dep[x]<dep[y]) swap(x,y);
+    //现将x，y变为同一层
+    for(int i=20;i>=0;i--)
+    {
+        if(dep[fa[x][i]]>=dep[y]) x=fa[x][i];
+        
+    }
+    if(x==y) return y;
+    for(int i=20;i>=0;i--)
+    {
+        if(fa[x][i]!=fa[y][i])
+        {
+            x=fa[x][i];
+            y=fa[y][i];
+        }
+    }
+    return fa[x][0];
+}
+
+
+
+int main()
+{
+    cin>>n;
+    int a,b;
+    for(int i=1;i<n;i++)
+    {
+        cin>>a>>b;
+        add(a,b);
+        add(b,a);
+    }
+    mi[0]=1;
+    dfs(1,0);//倍增预处理，dep，fa，mi，s数组
+    cin>>m;
+    for(int i=1,x,y,k;i<=m;i++)
+    {
+        cin>>x>>y>>k;
+        int z=lca(x,y);
+        LL ans=(s[x][k]+s[y][k]-s[z][k]-s[fa[z][0]][k]+2*mod)%mod;
+        cout<<ans<<endl;
+    }
+    return 0;
+}
+```
+
+### 2.最近公共祖先
+
+[P3379 【模板】最近公共祖先（LCA） - 洛谷](https://www.luogu.com.cn/problem/P3379)
+
+关键如何使用数据结构存储图结构以及怎样来使用全局常量
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAXN = 5e5 + 10;
+const int LOG = 20;
+
+vector<int> adj[MAXN]; // 邻接表：adj[u] 存 u 的所有邻接节点
+int fa[MAXN][LOG];
+int dep[MAXN];
+int N, M, S;
+
+void dfs(int u, int father) {
+    dep[u] = dep[father] + 1;
+    fa[u][0] = father;
+    // 倍增预处理：2^i 级祖先
+    for (int i = 1; i < LOG; ++i) {
+        fa[u][i] = fa[fa[u][i-1]][i-1];
+    }
+    // 遍历子节点
+    for (int v : adj[u]) {
+        if (v != father) {
+            dfs(v, u);
+        }
+    }
+}
+
+int lca(int u, int v) {
+    if (dep[u] < dep[v]) swap(u, v);
+    // 1. 先把 u 跳到和 v 同一深度
+    for (int i = LOG-1; i >= 0; --i) {
+        if (dep[fa[u][i]] >= dep[v]) {
+            u = fa[u][i];
+        }
+    }
+    if (u == v) return u;
+    // 2. 一起向上跳，直到 LCA 的下一层
+    for (int i = LOG-1; i >= 0; --i) {
+        if (fa[u][i] != fa[v][i]) {
+            u = fa[u][i];
+            v = fa[v][i];
+        }
+    }
+    return fa[u][0];
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cin >> N >> M >> S;
+    // 读入 N-1 条边
+    for (int i = 0; i < N-1; ++i) {
+        int x, y;
+        cin >> x >> y;
+        adj[x].push_back(y);
+        adj[y].push_back(x);
+    }
+    // 预处理根节点 S
+    dep[0] = 0;
+    dfs(S, 0);
+    // 处理查询
+    for (int i = 0; i < M; ++i) {
+        int x, y;
+        cin >> x >> y;
+        cout << lca(x, y) << '\n';
+    }
+    return 0;
+}
+```
+
+
+
+## 4.差分
+
+![image-20260316174038846](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603161740103.png)
+
+**注意：这里差分序列的容量大小应该为n+1，因为要确保最后一个a序列的最后一位差分也可包含在内**
+
+
+
+## 题目：
+
+### 1.一维差分
+
+[P4552 [Poetize6\] IncDec Sequence - 洛谷](https://www.luogu.com.cn/problem/P4552)
+
+思路关键:
+
+题目提到目标是让序列全部相同，并且是多次操作只看结果，所以联想到**转换为差分就是让差分序列结果的b2到bn全部为0就可以了**，转换为两点操作，然后就是确定是哪两点了，因为不需要看具体操作的是哪一个序列区间，并且一次只能增1减1，所以可以直接使用正负之和，来让内部的相互抵消，最后还剩下的有选两边的点进行消除到0
+
+![image-20260316174710431](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603161747732.png)
+
+
+
+### 2.二维差分
+
+[P3397 地毯 - 洛谷](https://www.luogu.com.cn/problem/P3397)
+
+思路：
+
+先想暴力破解：就是枚举m个地毯，然后内部循环一个地毯区间让每一位都+1，但是为O(mn^2)；
+
+这里看到内部循环是让每一个地毯区间都加上1，就是让n行序列区间加上1，**并且是多次访问这个序列**，所以可变为差分的形式
+
+**注意这里坐标是逻辑还是物理序号**
 
 
 
