@@ -1365,3 +1365,49 @@ for(int i=1;i<=n;i++)
 
 
 
+# 五.双重指针
+
+模版速览
+
+[A18 双指针（尺取法）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Mp4y1E74K/?spm_id_from=333.1387.collection.video_card.click&vd_source=86d06d10a03dcd75fe3a632194bc3c3c)
+
+![image-20260320201149108](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603202011333.png)
+
+双重指针主要作用在对与一个序列而言，它的有效范围是就是要从区间（有点类似前缀和的感觉）里做计算，或者满足什么条件来进行得到的，通常来说，如果从题目给的信息来看的话，答案可能要从一个序列之中顺序查找，那么此时可以考虑双重指针来规避双重循环每一个都要遍历的形式，提高性能。
+
+
+
+## 题目
+
+### 1.连续正整数的和
+
+[P1147 连续正整数和 - 洛谷](https://www.luogu.com.cn/problem/P1147)
+
+思路：
+
+首先给定一个整数，那么答案就要从1开始自然数这个序列查找的一个区间（因为是连续的），那么就可以考虑使用双指针，分别表示两端
+
+
+
+### 2.逛画展
+
+[P1638 逛画展 - 洛谷](https://www.luogu.com.cn/problem/P1638)
+
+![image-20260320202019203](https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603202020379.png)
+
+关键是变量的选取设置以及建模思想
+
+
+
+### 3.AB数对
+
+[P1102 A-B 数对 - 洛谷](https://www.luogu.com.cn/problem/P1102)
+
+关键是思想：
+
+要找出一对A，B满足A-B=C，就是可以枚举B，求取一个A满足B+C，所以可以枚举B，然后确定有效区间两端，然后更新b的时候，两端可以不变，因为我们让序列有序了，当b变大，所以对应的a一定较之前变大，所以a就可以一直往前遍历不用回头
+
+
+
+
+
