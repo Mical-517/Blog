@@ -16,22 +16,22 @@
     {{- partial "head.html" . }}
 </head>
 
-{{- if (or (ne .Kind `page` ) (eq .Layout `archives`) (eq .Layout `search`)) }}
-<body class="list" id="top">
-{{- else }}
-<body id="top">
-{{- end }}
+<body class="{{ if and .IsPage (eq .Type "posts") }}single{{ else }}list{{ end }}" id="top">
     {{ partialCached "header.html" . .Page -}}
     
-    <div class="container">
-        {{- if not .IsHome }}
-        {{- /* Optionally show sidebar only on home or all pages. The user wants it on the left. */ -}}
+    <div class="container {{ if and .IsPage (eq .Type "posts") }}post-container{{ else }}list-container{{ end }}">
+        {{- if and .IsPage (eq .Type "posts") }}
+            {{- partial "toc_sidebar.html" . }}
+            <main class="main">
+                {{- block "main" . }}{{ end }}
+            </main>
+            {{- partial "latest_posts_sidebar.html" . }}
+        {{- else }}
+            {{- partial "sidebar.html" . }}
+            <main class="main">
+                {{- block "main" . }}{{ end }}
+            </main>
         {{- end }}
-        {{- partial "sidebar.html" . }}
-        
-        <main class="main">
-            {{- block "main" . }}{{ end }}
-        </main>
     </div>
 
     {{ partialCached "footer.html" . .Layout .Kind (.Param "hideFooter") (.Param "ShowCodeCopyButtons") -}}

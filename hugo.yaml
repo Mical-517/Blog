@@ -74,6 +74,10 @@ menu:
       name: 标签
       url: /tags/
       weight: 20
+    - identifier: search
+      name: 搜索
+      url: /search/
+      weight: 30
     # 可以添加更多导航链接。weight的值越高排序越靠后
 
 # 如果要启用搜索功能，需要添加这个
@@ -82,4 +86,11 @@ outputs:
     - HTML
     - RSS
     - JSON # 必须，用于搜索功能
+
+# Markdown 渲染配置
+markup:
+  goldmark:
+    renderer:
+      unsafe: true # 允许使用 HTML 标签（如 <br>, <div> 等），这是让 Typora 中部分特殊排版生效的关键
+      hardWraps: true # 单回车也会换行，符合 Typora 的使用习惯
 

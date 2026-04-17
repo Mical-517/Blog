@@ -1,0 +1,10 @@
+<aside class="sidebar right-sidebar">
+    <div class="sidebar-title">最新文章</div>
+    <div class="latest-posts-list">
+        <ul>
+            {{- range first 5 (where site.RegularPages "Section" "posts") }}
+            <li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+            {{- end }}
+        </ul>
+    </div>
+</aside>

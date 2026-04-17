@@ -1,10 +1,14 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
+            {{- if site.Params.label.icon }}
+            <div class="header-avatar" title="关于我">
+                <img src="{{ "/avatar.png" | relURL }}" alt="avatar">
+            </div>
+            {{- end }}
             {{- $label_text := (site.Params.label.text | default site.Title) }}
             {{- if site.Title }}
-            <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
-                {{- /* Remove icon from here as it's moved to sidebar */ -}}
+            <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)" class="logo-text">
                 {{- $label_text -}}
             </a>
             {{- end }}
@@ -38,8 +42,6 @@
             {{- range site.Menus.main }}
             {{- $menu_item_url := (cond (strings.HasSuffix .URL "/") .URL (printf "%s/" .URL) ) | absLangURL }}
             {{- $page_url:= $currentPage.Permalink | absLangURL }}
-            {{- /* Skip search item if we want it as a separate box */ -}}
-            {{- if ne .Identifier "search" }}
             <li>
                 <a href="{{ .URL | absLangURL }}" title="{{ .Title | default .Name }}">
                     <span {{- if eq $menu_item_url $page_url }} class="active" {{- end }}>
@@ -50,18 +52,8 @@
                 </a>
             </li>
             {{- end }}
-            {{- end }}
         </ul>
-        
-        <div class="search-container">
-            <div class="search-box">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" id="search-input" placeholder="搜索..." onkeyup="if(event.keyCode==13) window.location.href='{{ "search" | absURL }}?q=' + this.value">
-            </div>
-        </div>
     </nav>
 </header>
+
+

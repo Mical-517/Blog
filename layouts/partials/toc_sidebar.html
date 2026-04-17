@@ -1,0 +1,44 @@
+{{- $headers := findRE "<h[1-6].*?>(.|\n])+?</h[1-6]>" .Content -}}
+{{- $has_headers := ge (len $headers) 1 -}}
+{{- if $has_headers -}}
+<aside class="sidebar left-sidebar">
+    <div class="sidebar-title">目录</div>
+    <div class="toc-container">
+        {{- partial "toc.html" . }}
+    </div>
+</aside>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tocItems = document.querySelectorAll('.toc-container li');
+    tocItems.forEach(item => {
+        const subMenu = item.querySelector('ol');
+        if (subMenu) {
+            item.classList.add('has-submenu');
+            
+            const toggleBtn = document.createElement('span');
+            toggleBtn.className = 'toc-toggle';
+            toggleBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 13.172l4.95-4.95 1.414 1.414L12 16 5.636 9.636 7.05 8.222z" fill="currentColor"/></svg>';
+            
+            // 默认全部展开，如果要默认折叠可以加 item.classList.add('collapsed');
+            
+            const link = item.querySelector('a');
+            if (link) {
+                item.insertBefore(toggleBtn, link);
+            } else {
+                item.prepend(toggleBtn);
+            }
+
+            // 默认全部折叠
+            item.classList.add('collapsed');
+
+            toggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                item.classList.toggle('collapsed');
+            });
+        }
+    });
+});
+</script>
+{{- end }}
