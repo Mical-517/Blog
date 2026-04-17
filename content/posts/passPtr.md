@@ -5,7 +5,7 @@ summary: "辨析传递指针还是指针的引用"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202601300127015.png
 tags: [关于传递指针还是指针引用]
-categories: '知识点'
+categories: '思考&&理解'
 draft: false
 lang: ''
 ---

@@ -5,7 +5,7 @@ summary: "二叉排序树&&AVL树涉及知识点导图"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202602011340604.png
 tags: [BST]
-categories: '知识点'
+categories: '数据结构'
 draft: false
 lang: ''
 ---

@@ -3,9 +3,9 @@ title: STL源码简要学习
 published: 2026-03-08T15:20:41+08:00
 summary: "介绍STL源码设计的各种知识"
 cover:
-  image: https://img-blog.csdnimg.cn/20190921113703683.png?x-oss-process=image/resize,m_fixed,h_224,w_224
+  image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603071804628.png
 tags: [STL]
-categories: '数据结构'
+categories: 'STL'
 draft: false
 lang: ''
 ---

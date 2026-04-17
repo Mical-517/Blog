@@ -5,7 +5,7 @@ summary: "使用智能指针重构了BST树"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202602011340604.png
 tags: [unique_ptr]
-categories: '现代c++'
+categories: 'c++新特性'
 draft: false
 lang: ''
 ---

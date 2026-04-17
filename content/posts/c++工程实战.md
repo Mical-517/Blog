@@ -5,7 +5,7 @@ summary: "对与B站c++工程实战的学习笔记"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202602142304908.png
 tags: [c++学习笔记]
-categories: '现代c++'
+categories: 'c++基础知识'
 draft: false
 lang: ''
 ---

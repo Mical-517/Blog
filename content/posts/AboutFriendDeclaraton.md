@@ -5,7 +5,7 @@ summary: "关于友元声明"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202601291712327.png
 tags: [友元声明]
-categories: '知识点'
+categories: '思考&&理解'
 draft: false
 lang: ''
 ---

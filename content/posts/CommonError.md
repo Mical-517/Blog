@@ -22,7 +22,7 @@ lang: ''
 
   
 
-  ```
+  ```c++
   template <class T1, class T2>
   class DiGraph {
   public:
@@ -54,7 +54,7 @@ lang: ''
 
 原因：嵌套结构体是模板类的 “内部成员”，外部必须通过模板类的完整类型定位，示例：
 
-```
+```c++
 // 错误：仅写DijkstraResult，编译器无法定位所属类
 // DijkstraResult DiGraph<T1,T2>::dijkstra(...) 
 
@@ -69,7 +69,7 @@ DiGraph<DataType,WeightType>::dijkstra(...)
 
 原因：模板编译采用 “延迟实例化”，编译器无法提前判断 `DiGraph<...>::DijkstraResult` 是 “类型” 还是 “变量 / 函数”，需 `typename` 显式声明为类型，示例：
 
-```
+```c++
 // 完整正确的类外函数定义签名
 template <class DataType, class WeightType>
 typename DiGraph<DataType, WeightType>::DijkstraResult  // 返回值：typename + 全限定名
@@ -94,7 +94,7 @@ DiGraph<DataType, WeightType>::dijkstra(const DataType& startVertex) {
 
 若需在模板类外部直接创建嵌套结构体对象，需遵循同样的访问规则：
 
-```
+```c++
 // 正确：typename + 模板类全限定名
 typename DiGraph<string, int>::DijkstraResult res;
 
@@ -150,7 +150,7 @@ DijkRes<string, int> res2;
 
 
 
-```
+```c++
 #include <iostream>
 using namespace std;
 
@@ -182,7 +182,7 @@ int main() {
 
 
 
-```
+```c++
 #include <iostream>
 using namespace std;
 
@@ -214,7 +214,7 @@ int main() {
 
 
 
-```
+```c++
 #include <iostream>
 using namespace std;
 
@@ -247,7 +247,7 @@ int main() {
 
 指针的规则和引用一致，只是语法不同，核心逻辑不变：
 
-```
+```c++
 #include <iostream>
 using namespace std;
 

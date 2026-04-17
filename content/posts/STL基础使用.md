@@ -5,7 +5,7 @@ summary: "简要介绍标准库中的容器分类以及使用"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202603071802289.png
 tags: [STL]
-categories: '数据结构'
+categories: 'STL'
 draft: false
 lang: ''
 ---

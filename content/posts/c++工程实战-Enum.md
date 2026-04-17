@@ -5,7 +5,7 @@ summary: "关于枚举类的知识"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202602011340604.png
 tags: [枚举]
-categories: '现代c++'
+categories: 'c++基础知识'
 draft: false
 lang: ''
 ---

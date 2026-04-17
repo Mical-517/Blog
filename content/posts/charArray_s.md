@@ -5,7 +5,7 @@ summary: "理解c字符串函数中参数的意义，理解缓冲区"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202602011340604.png
 tags: [c字符串函数参数意义]
-categories: '知识点'
+categories: '思考&&理解'
 draft: false
 lang: ''
 ---

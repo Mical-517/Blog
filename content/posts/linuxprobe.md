@@ -3,7 +3,7 @@ title: Linuxprobe
 published: 2026-03-17T21:26:54+08:00
 summary: "学习Linuxprobe过程笔记"
 cover:
-  image: https://i-blog.csdnimg.cn/blog_migrate/8e396597e76aeb10b2a7ac0940c8a7ed.jpeg#pic_center
+  image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202604172023783.png
 tags: [linux]
 categories: 'linux'
 draft: false

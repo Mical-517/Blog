@@ -5,7 +5,7 @@ summary: "关于vector使用"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202602011340604.png
 tags: [vector]
-categories: '现代c++'
+categories: 'c++基础知识'
 draft: false
 lang: ''
 ---

@@ -5,7 +5,7 @@ summary: "总结github学生认证的优惠福利课程"
 cover:
   image: https://bucket-qjy.oss-cn-qingdao.aliyuncs.com/picture/202601281736466.png
 tags: [github]
-categories: '技术文章'
+categories: '技术'
 draft: false
 lang: ''
 ---
