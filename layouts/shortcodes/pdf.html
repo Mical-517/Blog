@@ -1,0 +1,6 @@
+{{/* PDF.js 本地版短代码 - 适配阿里云 OSS 默认域名 */}}
+{{ $pdfUrl := .Get "url" | safeURL }}
+{{ $height := .Get "height" | default "800px" }}
+
+<iframe src="/pdfjs/web/viewer.html?file={{ $pdfUrl }}" width="100%" height="{{ $height }}" style="border: none;"
+    allowfullscreen></iframe>
